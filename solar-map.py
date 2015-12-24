@@ -10,6 +10,7 @@ google_places = GooglePlaces(API_KEY)
 
 @app.route("/", methods=["GET", "POST"])
 def mapview():
+
 	# create a map in view
 	mymap = Map(
 		identifier="view-side",
@@ -31,16 +32,14 @@ def mapview():
 
 	locations = None
 
-	# query_result = google_places.nearby_search(
-	# 	location='Antioch, California', radius=100)
-
 	if request.method == "POST":
 		query = google_places.nearby_search(location=request.form["user_search"], radius=100)
 		mymap = Map(
 			identifier="view-side",
+			maptype='HYBRID',
 			lat=query.places[0].geo_location['lat'],
 			lng=query.places[0].geo_location['lng'],
-			infobox=["<img src='./static/chicken.jpg' height=100 width=100>"],
+			infobox=["<img src='./static/chicken.jpg' height=100 width=100>"]*len(query.places),
 			markers=[(place.geo_location['lat'], place.geo_location['lng']) for place in query.places],
 			style="height:600px;width:1000px;margin:0;",
 			zoom=15
