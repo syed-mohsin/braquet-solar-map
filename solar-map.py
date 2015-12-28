@@ -20,23 +20,13 @@ def mapview():
 		style="height:600px;width:1000px;margin:0;"
 	)
 
-	sndmap = Map(
-		identifier="sndmap",
-		lat=37.4419,
-		lng=-122.1419,
-		infobox=["<img src='./static/chicken.jpg' height=100 width=100>"],
-		markers={'http://maps.google.com/mapfiles/ms/icons/green-dot.png':[(37.4419, -122.1419)],
-                 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png':[(37.4300, -122.1400)]},
-        style="height:600px;width:1000px;margin:0;"
-        )
-
 	locations = None
 
 	if request.method == "POST":
 		query = google_places.nearby_search(location=request.form["user_search"], radius=100)
 		mymap = Map(
 			identifier="view-side",
-			maptype='HYBRID',
+			maptype='SATELLITE',
 			lat=query.places[0].geo_location['lat'],
 			lng=query.places[0].geo_location['lng'],
 			infobox=["<img src='./static/chicken.jpg' height=100 width=100>"]*len(query.places),
@@ -49,7 +39,7 @@ def mapview():
 
 
 
-	return render_template('home.html', mymap=mymap, sndmap=sndmap, locations=locations)
+	return render_template('home.html', mymap=mymap, locations=locations)
 
 if __name__ == "__main__":
 	app.run(debug=True)

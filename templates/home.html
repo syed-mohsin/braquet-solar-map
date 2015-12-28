@@ -2,7 +2,6 @@
     <html>
     <head>
             {{mymap.js}}
-            <!-- {{sndmap.js}} -->
     </head>
     <body>
         <h1>Solar Map</h1>
@@ -11,6 +10,7 @@
             <input type="text" placeholder="Search for a region" name="user_search" required/>
             <button type="submit">Search</button>
         </form>
+
         {{mymap.html}}
 
         {% if locations %}
@@ -19,8 +19,6 @@
                 <div><p>{{ loc }}</p></div>
             {% endfor %}
         {% endif %}
-
-       <!--  {{sndmap.html}} -->
 
     </body>
 </html>
