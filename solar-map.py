@@ -1,13 +1,17 @@
 from flask import Flask, render_template, request
-# from flask_googlemaps import GoogleMaps
-# from flask_googlemaps import Map
-from gmap import Map
 from googleplaces import GooglePlaces, types, lang
+from geopy.geocoders import Nominatim
+from gmap import Map
+import numpy as np
+import urllib
+import cv2
+import os
 
 API_KEY = 'AIzaSyBRKjGUvrzzmZFJqSk_RrnZK4nWKUsaPTQ'
 app = Flask(__name__)
 # GoogleMaps(app)
 google_places = GooglePlaces(API_KEY)
+geolocator = Nominatim()
 
 @app.route("/", methods=["GET", "POST"])
 def mapview():
@@ -23,22 +27,54 @@ def mapview():
 
 	locations = None
 
+	# place markers on map corresponding to retrieved business results
 	if request.method == "POST":
 		query = google_places.nearby_search(location=request.form["user_search"], radius=100)
+		markers = [(place.geo_location['lat'], place.geo_location['lng']) for place in query.places]
+
 		mymap = Map(
 			identifier="view-side",
 			maptype='SATELLITE',
 			lat=query.places[0].geo_location['lat'],
 			lng=query.places[0].geo_location['lng'],
 			infobox=["<img src='./static/chicken.jpg' height=100 width=100>"]*len(query.places),
-			markers=[(place.geo_location['lat'], place.geo_location['lng']) for place in query.places],
+			markers=markers,
 			style="height:600px;width:1000px;margin:0;",
 			zoom=15
 		)
 
-		locations = [place.name for place in query.places]
+		# obtain business location details
+		locations = []
+		for place in query.places:
+			place.get_details()
+			locations.append([place.name, place.formatted_address])
+
+		# download google static maps for image processing
+		downloadStaticGoogleMaps(markers)
+
 
 	return render_template('home.html', mymap=mymap, locations=locations)
+
+def downloadStaticGoogleMaps(markers):
+	# for marker in markers:
+	url = "http://maps.googleapis.com/maps/api/staticmap?center=" + \
+	      str(markers[0][0]) + ',' + str(markers[0][1]) + '&' + 'maptype=satellite&zoom=19' + \
+	      "&size=400x400&sensor=false" 
+
+	img_loc = "static/maps/" + str(markers[0][0]) + str(markers[0][1]) + ".jpg"
+
+	urllib.urlretrieve(url, img_loc)
+
+	# im = cv2.imread(img_loc)
+	# imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+	# ret, thresh = cv2.threshold(imgray, 127, 255, 0)
+	# contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+	# cv2.drawContours(im, contours, -1, (0,255,0), 3)
+
+
+
+
 
 if __name__ == "__main__":
 	app.run(debug=True)
@@ -52,6 +88,7 @@ if __name__ == "__main__":
 # pip install --upgrade google-api-python-client
 # pip install geopy
 # pip install python-google-places
+# pip install numpy
 
 # MAC 
 # $ flask/bin/pip install flask

@@ -16,7 +16,9 @@
         {% if locations %}
             <h4>Nearby Businesses</h4>
             {% for loc in locations %}
-                <div><p>{{ loc }}</p></div>
+                <div><p>{{ loc.0 }}</p></div>
+               <!--  <div><p>Phone Number: {{loc.1}}</p></div> -->
+                <div><p>Address: {{loc.1}}</p></div>
             {% endfor %}
         {% endif %}
 
