@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request
-from flask_googlemaps import GoogleMaps
-from flask_googlemaps import Map
+# from flask_googlemaps import GoogleMaps
+# from flask_googlemaps import Map
+from gmap import Map
 from googleplaces import GooglePlaces, types, lang
 
 API_KEY = 'AIzaSyBRKjGUvrzzmZFJqSk_RrnZK4nWKUsaPTQ'
 app = Flask(__name__)
-GoogleMaps(app)
+# GoogleMaps(app)
 google_places = GooglePlaces(API_KEY)
 
 @app.route("/", methods=["GET", "POST"])
@@ -36,8 +37,6 @@ def mapview():
 		)
 
 		locations = [place.name for place in query.places]
-
-
 
 	return render_template('home.html', mymap=mymap, locations=locations)
 

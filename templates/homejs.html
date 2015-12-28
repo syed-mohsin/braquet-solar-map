@@ -1,0 +1,57 @@
+<script src="//maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+
+<style type="text/css">
+      #{{gmap.identifier}} { {{gmap.style}} }
+</style>
+
+<script type="text/javascript">
+	
+    function initialize_{{gmap.varname}}() {
+    	var markers = [];
+        var {{gmap.varname}} = new google.maps.Map(
+        document.getElementById('{{gmap.identifier}}'), {
+            center: new google.maps.LatLng({{gmap.center.0}}, {{gmap.center.1}}),
+            zoom: {{gmap.zoom}},
+            mapTypeId: google.maps.MapTypeId.{{gmap.maptype}}
+        });
+
+        {% for icon in gmap.markers %}
+            {% for marker in gmap.markers[icon] %}
+                var marker_{{loop.index0}} = new google.maps.Marker({
+                    position: new google.maps.LatLng({{marker.0}}, {{marker.1}}),
+                    map: {{gmap.varname}},
+                    icon: "{{ icon }}"
+                });
+
+                markers.push(marker_{{loop.index0}}); // for view boundary fitting
+
+                {% if gmap.infobox != None %}
+                        {% if gmap.typeflag %}
+                            google.maps.event.addListener(marker_{{loop.index0}}, 'click',
+                            getInfoCallback({{gmap.varname}}, "{{gmap.infobox[loop.index0]|safe}}"));
+                        {% else %}
+                            google.maps.event.addListener(marker_{{loop.index0}}, 'click',
+                            getInfoCallback({{gmap.varname}}, "{{gmap.infobox|safe}}"));
+                        {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+
+        var bounds = new google.maps.LatLngBounds();
+        for(i=0;i<markers.length;i++) {
+        	bounds.extend(markers[i].getPosition());
+        }
+
+        {{gmap.varname}}.fitBounds(bounds);
+    }
+
+
+    function getInfoCallback(map, content) {
+        var infowindow = new google.maps.InfoWindow({content: content});
+        return function() {
+                infowindow.setContent(content);
+                infowindow.open(map, this);
+            };
+    }
+    google.maps.event.addDomListener(window, 'load', initialize_{{gmap.varname}});
+</script>
