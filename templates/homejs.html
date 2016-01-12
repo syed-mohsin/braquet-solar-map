@@ -23,7 +23,8 @@
                     icon: "{{ icon }}"
                 });
 
-                markers.push(marker_{{loop.index0}}); // for view boundary fitting
+                // for view boundary fitting
+                markers.push(marker_{{loop.index0}}); 
 
                 {% if gmap.infobox != None %}
                         {% if gmap.typeflag %}
@@ -35,6 +36,18 @@
                         {% endif %}
                 {% endif %}
             {% endfor %}
+        {% endfor %}
+
+        {% for border in gmap.roof_borders %}
+    		var border_{{loop.index0}} = new google.maps.Polygon({
+    			paths: {{ border | safe }},
+    			strokeColor: '#FF0000',
+			    strokeOpacity: 0.8,
+			    strokeWeight: 2,
+			    fillColor: '#FF0000',
+			    fillOpacity: 0.35
+    		});
+    		border_{{loop.index0}}.setMap({{gmap.varname}});
         {% endfor %}
 
         var bounds = new google.maps.LatLngBounds();

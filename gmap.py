@@ -8,6 +8,7 @@ class Map(object):
 				 zoom=1, maptype="SATELLITE", markers=None,
 				 varname='map',
 				 style="height:600px;width:1000px;margin:0;",
+				 roof_borders=None,
 				 cls="map", 
 				 **kwargs):
 		self.cls= cls
@@ -17,6 +18,7 @@ class Map(object):
 		self.zoom = zoom
 		self.maptype = maptype
 		self.markers = markers or []
+		self.roof_borders = roof_borders or []
 		if isinstance(markers, list):
 				self.markers = {DEFAULT_ICON: markers}
 		self.identifier = identifier
