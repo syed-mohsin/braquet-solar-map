@@ -67,7 +67,7 @@ def mapview():
 			markers=markers,
 			roof_borders=roof_borders,
 			style="height:600px;width:1000px;margin:0;",
-			zoom=15
+			zoom=20
 		)
 
 		# obtain business location details
