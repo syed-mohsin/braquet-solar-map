@@ -8,7 +8,7 @@ import numpy as np
 from decimal import Decimal
 import json
 import urllib
-import cv2
+# import cv2
 import os
 
 app = Flask(__name__)
