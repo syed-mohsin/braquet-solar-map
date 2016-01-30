@@ -1,4 +1,5 @@
-<script src="//maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+<script src="//maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing" type="text/javascript">
+</script>
 
 <style type="text/css">
       #{{gmap.identifier}} { {{gmap.style}} }
@@ -14,6 +15,21 @@
             zoom: {{gmap.zoom}},
             mapTypeId: google.maps.MapTypeId.{{gmap.maptype}}
         });
+
+        // drawing manager
+        var draw = new google.maps.drawing.DrawingManager({
+            drawingMode: google.maps.drawing.OverlayType.POLYGON,
+            drawingControl: true,
+            drawingControlOptions: {
+              position: google.maps.ControlPosition.TOP_CENTER,
+              drawingModes: [
+                google.maps.drawing.OverlayType.POLYGON
+              ]
+            },
+            editable: true,
+            draggable: true
+        });
+        draw.setMap({{gmap.varname}});
 
         {% for icon in gmap.markers %}
             {% for marker in gmap.markers[icon] %}
@@ -45,7 +61,8 @@
 			    strokeOpacity: 0.8,
 			    strokeWeight: 2,
 			    fillColor: '#FF0000',
-			    fillOpacity: 0.35
+			    fillOpacity: 0.35,
+                editable: true
     		});
     		border_{{loop.index0}}.setMap({{gmap.varname}});
         {% endfor %}
