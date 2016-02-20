@@ -8,7 +8,6 @@ import numpy as np
 from decimal import Decimal
 import json
 import urllib
-# import cv2
 import os
 
 app = Flask(__name__)
@@ -79,63 +78,12 @@ def mapview():
 		# download google static maps for image processing
 		# downloadStaticGoogleMaps(markers)
 
-
 	return render_template('home.html', mymap=mymap, locations=locations)
-
-def downloadStaticGoogleMaps(markers):
-	# for marker in markers:
-	url = "http://maps.googleapis.com/maps/api/staticmap?center=" + \
-	      str(markers[0][0]) + ',' + str(markers[0][1]) + '&' + 'maptype=satellite&zoom=19' + \
-	      "&size=400x400&sensor=false" 
-
-	img_loc = "static/maps/" + str(markers[0][0]) + str(markers[0][1]) + ".jpg"
-
-	urllib.urlretrieve(url, img_loc)
-
-	# im = cv2.imread(img_loc)
-	# imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-	# ret, thresh = cv2.threshold(imgray, 127, 255, 0)
-	# contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-	# cv2.drawContours(im, contours, -1, (0,255,0), 3)
-
 
 if __name__ == "__main__":
 	app.run(debug=True)
 
-# search bar where you can input an address/location
 
-# pip install flask-googlemaps, pip install flask
-# pip install --upgrade google-api-python-client
-# pip install geopy
-# pip install python-google-places
-# pip install numpy
-# pip install Flask-PyMongo
 
-# MAC 
-# $ flask/bin/pip install flask
-# $ flask/bin/pip install flask-login
-# $ flask/bin/pip install flask-openid
-# $ flask/bin/pip install flask-mail
-# $ flask/bin/pip install flask-sqlalchemy
-# $ flask/bin/pip install sqlalchemy-migrate
-# $ flask/bin/pip install flask-whooshalchemy
-# $ flask/bin/pip install flask-wtf
-# $ flask/bin/pip install flask-babel
-# $ flask/bin/pip install guess_language
-# $ flask/bin/pip install flipflop
-# $ flask/bin/pip install coverage
 
-# Windows
-# $ flask\Scripts\pip install flask
-# $ flask\Scripts\pip install flask-login
-# $ flask\Scripts\pip install flask-openid
-# $ flask\Scripts\pip install flask-mail
-# $ flask\Scripts\pip install flask-sqlalchemy
-# $ flask\Scripts\pip install sqlalchemy-migrate
-# $ flask\Scripts\pip install flask-whooshalchemy
-# $ flask\Scripts\pip install flask-wtf
-# $ flask\Scripts\pip install flask-babel
-# $ flask\Scripts\pip install guess_language
-# $ flask\Scripts\pip install flipflop
-# $ flask\Scripts\pip install coverage
+
