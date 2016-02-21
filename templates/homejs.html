@@ -36,7 +36,7 @@
             var coordinates = polygon.getPath().getArray();
 
             // requires lat() as lat/lng here are functions not keys in a dictionary
-            panelLayout(polygon, coordinates, 0);
+            panelLayout(polygon, coordinates, 30);
         });
 
         function print_coordinates(coordinates) {
@@ -127,7 +127,7 @@
                         lat: centerPanelCoord.lat - radius * Math.sin(angleSpread + azimuthAngle),
                         lng: centerPanelCoord.lng + radius * Math.cos(angleSpread + azimuthAngle)
                     },
-                    {   // min lat, min lng ==> bottom left of panel
+                   {   // min lat, min lng ==> bottom left of panel
                         lat: centerPanelCoord.lat - radius * Math.sin(angleSpread + azimuthAngle),
                         lng: centerPanelCoord.lng - radius * Math.cos(angleSpread + azimuthAngle)
                     },
@@ -136,8 +136,8 @@
                         lng: centerPanelCoord.lng - radius * Math.cos(angleSpread + azimuthAngle)
                     },
                     {   // max lat, max lng ==> top right of panel
-                        lat: centerPanelCoord.lat + radius * Math.cos(angleSpread + azimuthAngle),
-                        lng: centerPanelCoord.lng + radius * Math.sin(angleSpread + azimuthAngle)
+                        lat: centerPanelCoord.lat + radius * Math.sin(angleSpread + azimuthAngle),
+                        lng: centerPanelCoord.lng + radius * Math.cos(angleSpread + azimuthAngle)
                     }
                     ];
 
