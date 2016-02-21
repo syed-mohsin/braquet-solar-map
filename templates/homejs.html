@@ -89,9 +89,8 @@
             return true;
         }
 
+        // generate an array of solar panels and overlay them over a drawn rooftop/polygon
         function panelLayout(polygon, coordinates, azimuth) {
-            print_coordinates(coordinates);
-
             // 115 degrees is when the two squares line up
             var azimuthAngle = azimuth / 180 * Math.PI; 
 
