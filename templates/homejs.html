@@ -31,6 +31,141 @@
         });
         draw.setMap({{gmap.varname}});
 
+        // event listener to obtain lat/lng coordinates from drawn polygon
+        google.maps.event.addListener(draw, 'polygoncomplete', function (polygon) {
+            var coordinates = polygon.getPath().getArray();
+
+            // requires lat() as lat/lng here are functions not keys in a dictionary
+            panelLayout(polygon, coordinates, 0);
+        });
+
+        function print_coordinates(coordinates) {
+            for (var i=0; i < coordinates.length; i++) {
+                var xy = coordinates[i];
+                // requires lat()/lng() as lat/lng here are functions not keys in a dictionary
+                console.log("lat: " + xy.lat() + "; lng: " + xy.lng());
+            }
+        }
+
+        function endCoords(roof_area) {
+            var latRoof = [];
+            var lngRoof = [];
+            for (var i = 0; i < roof_area.length; i++) {
+                // requires lat() as lat/lng here are functions 
+                //not keys in a dictionary
+                latRoof.push(roof_area[i].lat()); 
+                lngRoof.push(roof_area[i].lng());
+            }
+
+            return [{
+                     lat: Math.max(...latRoof),
+                     lng: Math.max(...lngRoof)
+            },      {
+                     lat: Math.min(...latRoof),
+                     lng: Math.min(...lngRoof)
+            }]; // array of [max, min] coordinates
+        }
+
+        // determines max distance from all points so we can decide maximum number of panels that can be placed in one direction
+        function maxDistance(roof_area) {
+            var distance = [];
+            for (var i = 0; i < roof_area.length; i++) {
+                for (j = i + 1; j < roof_area.length; j++) {
+                    distance.push(Math.sqrt(Math.abs(Math.pow((roof_area[i].lat()-roof_area[j].lat()), 2) + Math.pow((roof_area[i].lng() - roof_area[j].lng()), 2))));
+                }
+            }
+            return Math.max(...distance);
+        }
+
+        // check if a collection of points falls within a polygon
+        function containsPolygon(points_array, polygon) {
+            for (var i = 0; i < points_array.length; i++) {
+                var point = new google.maps.LatLng(points_array[i].lat, points_array[i].lng);
+                var roof_check = google.maps.geometry.poly.containsLocation(point, polygon);
+                if (roof_check === false) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function panelLayout(polygon, coordinates, azimuth) {
+            print_coordinates(coordinates);
+
+            // 115 degrees is when the two squares line up
+            var azimuthAngle = azimuth / 180 * Math.PI; 
+
+            var solar_spec = {width: 0.000015, length: 0.0000065};
+            var row_space = 5.8; // space between row of panels
+            var col_space = 2.8; // space between column of panels
+
+            var maxArea = endCoords(coordinates);
+            console.log(maxArea);
+            // determines max number of rows/columns in a solar system
+            var num_col = Math.round(maxDistance(coordinates) / solar_spec.width);
+            var num_row = Math.round(maxDistance(coordinates) / solar_spec.length);
+
+            // initialize array for panel indexes
+            var solarSystem = []; 
+
+            // distance from center of panel to a corner point of panel
+            var radius = Math.sqrt(Math.pow(solar_spec.length / 2, 2) + Math.pow(solar_spec.width / 2, 2));
+
+            // angle between center and a corner point of panel
+            var angleSpread = Math.acos(solar_spec.width / (radius * 2));
+            for (j = 0; j < num_col; j++) {
+                for (i = 0; i < num_row; i++) {
+                    var panelCoords = [];
+                    var centerPanelCoord = {
+                        lat: maxArea[1].lat + solar_spec.length * row_space * (i / 2),
+                        lng: maxArea[0].lng - solar_spec.width * col_space * (j / 2)
+                    };
+
+                    // start populating rooftop from min lat, max lng ==> bottom right of panel
+                    var pv_corner_array = [
+                    {   // min lat, max lng ==> bottom right of panel
+                        lat: centerPanelCoord.lat - radius * Math.sin(angleSpread + azimuthAngle),
+                        lng: centerPanelCoord.lng + radius * Math.cos(angleSpread + azimuthAngle)
+                    },
+                    {   // min lat, min lng ==> bottom left of panel
+                        lat: centerPanelCoord.lat - radius * Math.sin(angleSpread + azimuthAngle),
+                        lng: centerPanelCoord.lng - radius * Math.cos(angleSpread + azimuthAngle)
+                    },
+                    {   // max lat, min lng top left of panel
+                        lat: centerPanelCoord.lat + radius * Math.sin(angleSpread + azimuthAngle),
+                        lng: centerPanelCoord.lng - radius * Math.cos(angleSpread + azimuthAngle)
+                    },
+                    {   // max lat, max lng ==> top right of panel
+                        lat: centerPanelCoord.lat + radius * Math.cos(angleSpread + azimuthAngle),
+                        lng: centerPanelCoord.lng + radius * Math.sin(angleSpread + azimuthAngle)
+                    }
+                    ];
+
+                    // check if any corners are not within our rooftop polygon
+                    if (containsPolygon(pv_corner_array, polygon) === false) {
+                        continue;
+                    }
+
+                    // add panel to panel array
+                    for (m = 0; m < pv_corner_array.length; m++) {
+                        panelCoords.push(pv_corner_array[m]);
+                    }
+                    
+                    // add panel to solar system array
+                    solarSystem.push(panelCoords);
+                }
+            }
+            new google.maps.Polygon({ 
+                map: map,
+                paths: solarSystem,
+                strokeColor: 'grey',
+                strokeOpacity: 1,
+                strokeWeight: 1,
+                fillColor: 'blue',
+                fillOpacity: 1
+            });
+        }
+
         {% for icon in gmap.markers %}
             {% for marker in gmap.markers[icon] %}
                 var marker_{{loop.index0}} = new google.maps.Marker({
@@ -74,6 +209,7 @@
 
         {{gmap.varname}}.fitBounds(bounds);
     }
+
 
 
     function getInfoCallback(map, content) {
