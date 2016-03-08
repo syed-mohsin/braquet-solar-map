@@ -100,9 +100,7 @@
             return true;
         }
 
-        // generate an array of solar panels and overlay them over a drawn rooftop/polygon
         function panelLayout(polygon, coordinates, azimuth) {
-<<<<<<< HEAD
             print_coordinates(coordinates);
 
             var solar_spec = {width: 0.0000114, length: 0.0000115};
@@ -113,10 +111,6 @@
 
             // angle between center and a corner point of panel
             var angleSpread = Math.acos(solar_spec.width / (radius * 2));
-=======
-            // 115 degrees is when the two squares line up
-            var azimuthAngle = azimuth / 180 * Math.PI; 
->>>>>>> 3cead2f922553af28b9603341c6539ff7e1f71a1
 
             //determines equivalent azimuth for angles over 180 as the layout algorithm only works in one direction    
             var real_azimuthAngle = azimuth/180*Math.PI + 116.6/180*Math.PI ; //115 degrees is when the two squars line up
