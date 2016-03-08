@@ -40,7 +40,7 @@
             var coordinates = polygon.getPath().getArray();
 
             // requires lat() as lat/lng here are functions not keys in a dictionary
-            panelLayout(polygon, coordinates,  290);
+            panelLayout(polygon, coordinates,  150, 1.4, 1);
         });
 
 
@@ -100,7 +100,7 @@
             return true;
         }
 
-        function panelLayout(polygon, coordinates, azimuth) {
+        function panelLayout(polygon, coordinates, azimuth, rowSpace, colSpace) {
             print_coordinates(coordinates);
 
             var solar_spec = {width: 0.0000114, length: 0.0000115};
@@ -170,9 +170,9 @@
                     var panelCoords = [];
                     var centerPanelCoord = {
 
-                        lat: maxGeo[initCorner].lat + radius * Math.cos(angle2) * (i-j) + radius * Math.cos(angle1) * (i+j),
+                        lat: maxGeo[initCorner].lat + radius * Math.cos(angle2) * (rowSpace*i - colSpace*j) + radius * Math.cos(angle1) * (rowSpace*i + colSpace*j),
 
-                        lng: maxGeo[initCorner].lng + radius * Math.sin(angle2) * (i-j) + radius * Math.sin(angle1) * (i+j)
+                        lng: maxGeo[initCorner].lng + radius * Math.sin(angle2) * (rowSpace*i - colSpace*j) + radius * Math.sin(angle1) * (rowSpace*i + colSpace*j)
 
                     };
 
