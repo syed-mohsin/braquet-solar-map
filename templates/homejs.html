@@ -40,10 +40,8 @@
             var coordinates = polygon.getPath().getArray();
 
             // requires lat() as lat/lng here are functions not keys in a dictionary
-            panelLayout(polygon, coordinates,  150, 1.4, 1);
+            panelLayout(polygon, coordinates,  50, 40, 1.4, 'portrait', 25);
         });
-
-
 
         function print_coordinates(coordinates) {
             for (var i=0; i < coordinates.length; i++) {
@@ -100,12 +98,35 @@
             return true;
         }
 
-        function panelLayout(polygon, coordinates, azimuth, rowSpace, colSpace) {
+        function panelLayout(polygon, coordinates, azimuth, tilt, rowSpace, orientation, moduleWattage) {
+            //azimuth - angle of panel from true North
+            //rowSpace - space between rows of panels
+            //colSpace - space between columns of panels
+            //moduleWattage - wattage of each panel
+
             print_coordinates(coordinates);
 
-            var solar_spec = {width: 0.0000114, length: 0.0000115};
-            var row_space = 1; // space between row of panels
-            var col_space = 1; // space between column of panels
+            //binary system to switch panel orientation between landscape and portrait
+            if(orientation == 'landscape'){
+                   land = 1;
+                   port = 0;
+                } else if(orientation == 'portrait'){
+                    land = 0;
+                    port = 1;
+                }
+
+            var tiltCoeff = Math.cos(tilt*Math.PI/180)
+
+            var solarWidth = Math.pow(tiltCoeff, land) * 0.0000428
+            var solarLength = Math.pow(tiltCoeff, port) * 0.0000828
+
+            var solar_spec = {width: solarWidth, length: solarLength};
+
+            console.log("width: " + solar_spec.width + "length: " + solar_spec.length)
+
+            // Math.pow(Math.cos(tilt * Math.PI/180), port)*
+
+            // Math.pow(Math.cos(tilt * Math.PI/180), land)*
 
             var radius = Math.sqrt(Math.pow(solar_spec.length / 2, 2) + Math.pow(solar_spec.width / 2, 2));
 
@@ -113,15 +134,15 @@
             var angleSpread = Math.acos(solar_spec.width / (radius * 2));
 
             //determines equivalent azimuth for angles over 180 as the layout algorithm only works in one direction    
-            var real_azimuthAngle = azimuth/180*Math.PI + 116.6/180*Math.PI ; //115 degrees is when the two squars line up
+            var real_azimuthAngle = azimuth/180*Math.PI + 56.6/180*Math.PI ; //115 degrees is when the two squars line up
 
             //Converts azimuth angle into opposing angle that's under 180 deg. and converts maximum geometry angle 
             if(azimuth >= 0 && azimuth <= 90 || azimuth >= 181 && azimuth <= 270) {
-                azimuthAngle = azimuth / 180 * Math.PI - 25 / 180 * Math.PI
+                azimuthAngle = azimuth / 180 * Math.PI - 90.6 / 180 * Math.PI
                 var theta = -(90 - azimuthAngle + 130 * Math.PI/180);
 
             } else if(azimuth >= 91 && azimuth <= 180 || azimuth >= 271 && azimuth <= 360){
-                azimuthAngle = (azimuth -180) / 180 * Math.PI - 25 / 180 * Math.PI
+                azimuthAngle = (azimuth -180) / 180 * Math.PI - 90.6 / 180 * Math.PI
                 var theta = -(90 - azimuthAngle + 130 * Math.PI/180 - 90 * Math.PI/180);
 
             }
@@ -170,9 +191,9 @@
                     var panelCoords = [];
                     var centerPanelCoord = {
 
-                        lat: maxGeo[initCorner].lat + radius * Math.cos(angle2) * (rowSpace*i - colSpace*j) + radius * Math.cos(angle1) * (rowSpace*i + colSpace*j),
+                        lat: maxGeo[initCorner].lat + radius * Math.cos(angle2) * (Math.pow(rowSpace, port)*i - Math.pow(rowSpace, land)*j) + radius * Math.cos(angle1) * (Math.pow(rowSpace, port)*i + Math.pow(rowSpace, land)*j),
 
-                        lng: maxGeo[initCorner].lng + radius * Math.sin(angle2) * (rowSpace*i - colSpace*j) + radius * Math.sin(angle1) * (rowSpace*i + colSpace*j)
+                        lng: maxGeo[initCorner].lng + radius * Math.sin(angle2) * (Math.pow(rowSpace, port)*i - Math.pow(rowSpace, land)*j) + radius * Math.sin(angle1) * (Math.pow(rowSpace, port)*i + Math.pow(rowSpace, land)*j)
 
                     };
 
@@ -211,14 +232,20 @@
                     solarSystem.push(panelCoords);
                 }
             }
+
+            //Calculate how many kW the array is
+            var systemCapacity = moduleWattage * solarSystem.length/1000;
+
+            console.log("Nameplate Capacity: " + systemCapacity + "kW")
+
             new google.maps.Polygon({ 
                 map: map,
                 paths: solarSystem,
                 strokeColor: 'grey',
                 strokeOpacity: 1,
-                strokeWeight: 1,
+                strokeWeight: 2,
                 fillColor: 'blue',
-                fillOpacity: 1
+                fillOpacity: 0.8
             });
 
             //Creates shape of maximum panel area for testing. Comment out to layer max rectangle around clicked polygon
@@ -263,7 +290,7 @@
                 strokeOpacity: 0.8,
                 strokeWeight: 2,
                 fillColor: '#FF0000',
-                fillOpacity: 0.35,
+                fillOpacity: 0.65,
                 editable: true
             });
             border_{{loop.index0}}.setMap({{gmap.varname}});
