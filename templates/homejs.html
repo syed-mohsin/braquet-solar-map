@@ -256,8 +256,10 @@
                 fillOpacity: 1
             });
 
+            //calculates the nameplace capacity of the system on the rooftop
             var systemCapacity = moduleWattage * solarSystem.length/1000;
 
+            //displays the nameplace capacity
             document.getElementById("projectStats").innerHTML = "Nameplate Capacity: " + systemCapacity + "kW";
 
             //Creates shape of maximum panel area for testing. Comment out to layer max rectangle around clicked polygon
