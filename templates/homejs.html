@@ -6,6 +6,40 @@
 </style>
 
 <script type="text/javascript">
+
+    function CenterControl(controlDiv, map) {
+
+            // Set CSS for the control border.
+            var controlUI = document.createElement('div');
+            controlUI.style.backgroundColor = '#fff';
+            controlUI.style.border = '2px solid #fff';
+            controlUI.style.borderRadius = '3px';
+            controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+            controlUI.style.marginBottom = '22px';
+            controlUI.style.padding = '22px';
+            controlUI.style.textAlign = 'center';
+            controlUI.title = 'Click to recenter the map';
+            controlDiv.appendChild(controlUI);
+
+            // Set CSS for the control interior.
+            var controlText = document.createElement('div');
+            controlText.style.color = 'rgb(25,25,25)';
+            controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+            controlText.style.fontSize = '16px';
+            controlText.style.lineHeight = '20px';
+            controlText.style.paddingLeft = '5px';
+            controlText.style.paddingRight = '5px';
+
+            controlText.innerHTML = 'Walmart Project Settings';
+            controlText.innerHTML += '<div id="projectStats" style="font-size:10px;"></div>';
+            controlText.innerHTML += '<br><br><input type="text" placeholder="Azimuth (Deg)">';
+            controlText.innerHTML += '<br><br><input type="text" placeholder="Tilt (Deg)">';
+            controlText.innerHTML += '<br><br><input type="text" placeholder="Row space (in.)">';
+            controlText.innerHTML += '<br><br><button class="btn btn-default">Update</button>';
+
+            controlUI.appendChild(controlText);
+
+          }
     
     function initialize_{{gmap.varname}}() {
         var markers = [];
@@ -15,6 +49,12 @@
             zoom: {{gmap.zoom}},
             mapTypeId: google.maps.MapTypeId.{{gmap.maptype}}
         });
+
+        var centerControlDiv = document.createElement('div');
+        var centerControl = new CenterControl(centerControlDiv, map);
+
+        centerControlDiv.index = 1;
+        map.controls[google.maps.ControlPosition.LEFT_TOP].push(centerControlDiv);
 
         // drawing manager
         var draw = new google.maps.drawing.DrawingManager({
@@ -29,20 +69,17 @@
             editable: true,
             draggable: true,
             polygonOptions: {
-                fillColor: '#1E90FF',
-                strokeColor: '#1E90FF'
+                fillColor: 'yellow',
+                strokeColor: 'yellow'
             }
         });
         draw.setMap({{gmap.varname}});
-
         // event listener to obtain lat/lng coordinates from drawn polygon
         google.maps.event.addListener(draw, 'polygoncomplete', function (polygon) {
             var coordinates = polygon.getPath().getArray();
-
             // requires lat() as lat/lng here are functions not keys in a dictionary
-            panelLayout(polygon, coordinates,  50, 40, 1.4, 'portrait', 25);
+            panelLayout(polygon, coordinates,  120, 'landscape', 1.6, 30, 235);
         });
-
         function print_coordinates(coordinates) {
             for (var i=0; i < coordinates.length; i++) {
                 var xy = coordinates[i];
@@ -51,11 +88,9 @@
             }
             console.log(coordinates[0].lat())
         }
-
         // determines max distance from all points so we can decide maximum number of panels that can be placed in one direction
         function maxDistance(roof_area) {
             var distance = [];
-
             for (var i = 0; i < roof_area.length; i++) {
                 for (j = i + 1; j < roof_area.length; j++) {
                     console.log(roof_area[i].lat-roof_area[j].lat)
@@ -66,7 +101,6 @@
             //console.log(distance)
             return Math.max(...distance);
         }
-
         function endCoords(roof_area) {
             var latRoof = [];
             var lngRoof = [];
@@ -76,7 +110,6 @@
                 latRoof.push(roof_area[i].lat()); 
                 lngRoof.push(roof_area[i].lng());
             }
-
             return [{
                      lat: Math.max(...latRoof),
                      lng: Math.max(...lngRoof)
@@ -85,7 +118,6 @@
                      lng: Math.min(...lngRoof)
             }]; // array of [max, min] coordinates
         }
-
         // check if a collection of points falls within a polygon
         function containsPolygon(points_array, polygon) {
             for (var i = 0; i < points_array.length; i++) {
@@ -97,78 +129,67 @@
             }
             return true;
         }
-
-        function panelLayout(polygon, coordinates, azimuth, tilt, rowSpace, orientation, moduleWattage) {
+        function panelLayout(polygon, coordinates, azimuth, orientation, rowSpace, tilt, moduleWattage) {
             //azimuth - angle of panel from true North
-            //rowSpace - space between rows of panels
-            //colSpace - space between columns of panels
+            //tilt - angle of panel from ground - not working properly for portrait..might be the difference between latitude/longitude conversion from meters
+            //rowSpace - space between rows 
+            //orientation - 'landscape' or 'portrait'
             //moduleWattage - wattage of each panel
 
             print_coordinates(coordinates);
 
-            //binary system to switch panel orientation between landscape and portrait
-            if(orientation == 'landscape'){
-                   land = 1;
-                   port = 0;
-                } else if(orientation == 'portrait'){
-                    land = 0;
-                    port = 1;
-                }
+            //tilt multiplier to adjust how the panel would look tilted
+            var tilt_coeff = Math.cos(tilt*Math.PI/180);
 
-            var tiltCoeff = Math.cos(tilt*Math.PI/180)
+            //solar spec before tilt is considered
+            var pre_solar_spec = {width: 0.0000214, length: 0.0000315};
 
-            var solarWidth = Math.pow(tiltCoeff, land) * 0.0000428
-            var solarLength = Math.pow(tiltCoeff, port) * 0.0000828
-
-            var solar_spec = {width: solarWidth, length: solarLength};
-
-            console.log("width: " + solar_spec.width + "length: " + solar_spec.length)
-
-            // Math.pow(Math.cos(tilt * Math.PI/180), port)*
-
-            // Math.pow(Math.cos(tilt * Math.PI/180), land)*
-
-            var radius = Math.sqrt(Math.pow(solar_spec.length / 2, 2) + Math.pow(solar_spec.width / 2, 2));
-
-            // angle between center and a corner point of panel
-            var angleSpread = Math.acos(solar_spec.width / (radius * 2));
-
-            //determines equivalent azimuth for angles over 180 as the layout algorithm only works in one direction    
-            var real_azimuthAngle = azimuth/180*Math.PI + 56.6/180*Math.PI ; //115 degrees is when the two squars line up
-
-            //Converts azimuth angle into opposing angle that's under 180 deg. and converts maximum geometry angle 
-            if(azimuth >= 0 && azimuth <= 90 || azimuth >= 181 && azimuth <= 270) {
-                azimuthAngle = azimuth / 180 * Math.PI - 90.6 / 180 * Math.PI
-                var theta = -(90 - azimuthAngle + 130 * Math.PI/180);
-
-            } else if(azimuth >= 91 && azimuth <= 180 || azimuth >= 271 && azimuth <= 360){
-                azimuthAngle = (azimuth -180) / 180 * Math.PI - 90.6 / 180 * Math.PI
-                var theta = -(90 - azimuthAngle + 130 * Math.PI/180 - 90 * Math.PI/180);
-
+            if(orientation == 'portrait'){
+                azimuth += 90;
+                port = 1;
+                lat = 0;
+            } else if(orientation == 'landscape'){
+                azimuth = azimuth
+                port = 0;
+                lat = 1;
             }
 
+            var solar_spec = {width: Math.pow(tilt_coeff, port) * pre_solar_spec.width, length: Math.pow(tilt_coeff, lat) * pre_solar_spec.length};
+
+            console.log('Pre Tilt: ' + pre_solar_spec.width + 'Post: ' + solar_spec.width)
+
+            var row_space = Math.pow(rowSpace, port); // space between row of panels
+            var col_space = Math.pow(rowSpace, lat); // space between column of panels
+
+            var radius = Math.sqrt(Math.pow(solar_spec.length / 2, 2) + Math.pow(solar_spec.width / 2, 2));
+            // angle between center and a corner point of panel
+            var angleSpread = Math.acos(solar_spec.width / (radius * 2));
+            //determines equivalent azimuth for angles over 180 as the layout algorithm only works in one direction    
+            var real_azimuthAngle = azimuth/180*Math.PI + 116.6/180*Math.PI ; //115 degrees is when the two squars line up
+            //Converts azimuth angle into opposing angle that's under 180 deg. and converts maximum geometry angle 
+            if(azimuth >= 0 && azimuth <= 90 || azimuth >= 181 && azimuth <= 270) {
+                azimuthAngle = azimuth / 180 * Math.PI - 25 / 180 * Math.PI
+                var theta = -(90 - azimuthAngle + 130 * Math.PI/180);
+            } else if(azimuth >= 91 && azimuth <= 180 || azimuth >= 271 && azimuth <= 360){
+                azimuthAngle = (azimuth -180) / 180 * Math.PI - 25 / 180 * Math.PI
+                var theta = -(90 - azimuthAngle + 130 * Math.PI/180 - 90 * Math.PI/180);
+            }
             //Calculates maximum distance of rectangle outside that fits right ouside the polygon
             var maxArea = endCoords(coordinates);
             var dlat = Math.abs(maxArea[1].lat - maxArea[0].lat)
             var dlng = Math.abs(maxArea[1].lng - maxArea[0].lng)
-
             // initialize array for panel indexes
             var solarSystem = []; 
-
             //Angles to determine where central points of each panel will be in relation to the previous one
             var angle1 = azimuthAngle + angleSpread + Math.PI
             var angle2 = azimuthAngle + Math.PI
-
             //Geometric profile of the biggest possible recentangular area around the user selected polygon
             var maxGeo = [
-
                 {lat: maxArea[1].lat + dlat*Math.cos(theta)*Math.cos(theta), lng: maxArea[1].lng + dlat*Math.sin(theta)*Math.cos(theta)},
                 {lat: maxArea[1].lat + dlat - dlng*Math.sin(theta)*Math.cos(theta), lng: maxArea[1].lng + dlng*Math.cos(theta)*Math.cos(theta)},
                 {lat: maxArea[1].lat + dlat - dlat*Math.cos(theta)*Math.cos(theta), lng: maxArea[1].lng + dlng - dlat*Math.sin(theta)*Math.cos(theta)},
                 {lat: maxArea[1].lat + dlng*Math.sin(theta)*Math.cos(theta), lng: maxArea[1].lng + dlng - dlng*Math.cos(theta)*Math.cos(theta)},
-
             ];
-
             //Determines the starting point of the panel layout depending on the azimuth
             if(azimuth >= 0 && azimuth <= 90){
                 var initCorner = 2
@@ -179,25 +200,20 @@
             } else if(azimuth >= 271 && azimuth <= 360) {
                 var initCorner = 3
             }
-
             // determines max number of rows/columns in a solar system
             var maxD2 = maxDistance(maxGeo);
-            var num_col = Math.round(maxD2 / solar_spec.width) * 1;
-            var num_row = num_col;
 
+            var smallerDimPanel = Math.min(solar_spec.width, solar_spec.length)
+            var num_col = Math.round(maxD2 / smallerDimPanel);
+            var num_row = num_col;
             // lays out panel over the polygon and determines if it's in the polygon or not
             for (j = 0; j < num_col; j++) {
                 for (i = 0; i < num_row; i++) {
                     var panelCoords = [];
                     var centerPanelCoord = {
-
-                        lat: maxGeo[initCorner].lat + radius * Math.cos(angle2) * (Math.pow(rowSpace, port)*i - Math.pow(rowSpace, land)*j) + radius * Math.cos(angle1) * (Math.pow(rowSpace, port)*i + Math.pow(rowSpace, land)*j),
-
-                        lng: maxGeo[initCorner].lng + radius * Math.sin(angle2) * (Math.pow(rowSpace, port)*i - Math.pow(rowSpace, land)*j) + radius * Math.sin(angle1) * (Math.pow(rowSpace, port)*i + Math.pow(rowSpace, land)*j)
-
+                        lat: maxGeo[initCorner].lat + radius * Math.cos(angle2) * (row_space*i - col_space*j) + radius * Math.cos(angle1) * (row_space*i + col_space*j),
+                        lng: maxGeo[initCorner].lng + radius * Math.sin(angle2) * (row_space*i - col_space*j) + radius * Math.sin(angle1) * (row_space*i + col_space*j)
                     };
-
-
                      // start populating rooftop from min lat, max lng ==> bottom right of panel
                     var pv_corner_array = [
                     {   // min lat, max lng ==> bottom right of panel
@@ -217,12 +233,10 @@
                         lng: centerPanelCoord.lng + radius * Math.sin(azimuthAngle + angleSpread + Math.PI)
                     }
                     ];
-
                     //check if any corners are not within our rooftop polygon
                     if (containsPolygon(pv_corner_array, polygon) === false) {
                         continue;
                     }
-
                     // add panel to panel array
                     for (m = 0; m < pv_corner_array.length; m++) {
                         panelCoords.push(pv_corner_array[m]);
@@ -232,34 +246,31 @@
                     solarSystem.push(panelCoords);
                 }
             }
-
-            //Calculate how many kW the array is
-            var systemCapacity = moduleWattage * solarSystem.length/1000;
-
-            console.log("Nameplate Capacity: " + systemCapacity + "kW")
-
             new google.maps.Polygon({ 
                 map: map,
                 paths: solarSystem,
                 strokeColor: 'grey',
                 strokeOpacity: 1,
-                strokeWeight: 2,
-                fillColor: 'blue',
-                fillOpacity: 0.8
+                strokeWeight: 1,
+                fillColor: '#084c8d',
+                fillOpacity: 1
             });
+
+            var systemCapacity = moduleWattage * solarSystem.length/1000;
+
+            document.getElementById("projectStats").innerHTML = "Nameplate Capacity: " + systemCapacity + "kW";
 
             //Creates shape of maximum panel area for testing. Comment out to layer max rectangle around clicked polygon
             // new google.maps.Polygon({ 
             //     map: map,
             //     paths: maxGeo,
-            //     strokeColor: 'yellow',
+            //     strokeColor: 'red',
             //     strokeOpacity: 1,
             //     strokeWeight: 1,
-            //     fillColor: 'yellow',
+            //     fillColor: 'red',
             //     fillOpacity: 0.4
             // });
         }
-
         {% for icon in gmap.markers %}
             {% for marker in gmap.markers[icon] %}
                 var marker_{{loop.index0}} = new google.maps.Marker({
@@ -267,10 +278,8 @@
                     map: {{gmap.varname}},
                     icon: "{{ icon }}"
                 });
-
                 // for view boundary fitting
                 markers.push(marker_{{loop.index0}}); 
-
                 {% if gmap.infobox != None %}
                         {% if gmap.typeflag %}
                             google.maps.event.addListener(marker_{{loop.index0}}, 'click',
@@ -282,30 +291,24 @@
                 {% endif %}
             {% endfor %}
         {% endfor %}
-
         {% for border in gmap.roof_borders %}
             var border_{{loop.index0}} = new google.maps.Polygon({
                 paths: {{ border | safe }},
-                strokeColor: '#FF0000',
+                strokeColor: 'yellow',
                 strokeOpacity: 0.8,
                 strokeWeight: 2,
-                fillColor: '#FF0000',
-                fillOpacity: 0.65,
+                fillColor: 'yellow',
+                fillOpacity: 0.35,
                 editable: true
             });
             border_{{loop.index0}}.setMap({{gmap.varname}});
         {% endfor %}
-
         var bounds = new google.maps.LatLngBounds();
         for(i=0;i<markers.length;i++) {
             bounds.extend(markers[i].getPosition());
         }
-
         {{gmap.varname}}.fitBounds(bounds);
     }
-
-
-
     function getInfoCallback(map, content) {
         var infowindow = new google.maps.InfoWindow({content: content});
         return function() {
