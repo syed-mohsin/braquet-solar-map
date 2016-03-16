@@ -3,6 +3,11 @@
 
 <style type="text/css">
       #{{gmap.identifier}} { {{gmap.style}} }
+
+      .title {
+        font-size:12px;
+        display:none;
+      }
 </style>
 
 <script type="text/javascript">
@@ -31,11 +36,12 @@
             controlText.style.paddingRight = '5px';
 
             controlText.innerHTML = 'Walmart Project Settings';
-            controlText.innerHTML += '<div id="projectStats" style="font-size:10px;"></div>';
-            controlText.innerHTML += '<br><br><input type="text" placeholder="Azimuth (Deg)">';
-            controlText.innerHTML += '<br><br><input type="text" placeholder="Tilt (Deg)">';
-            controlText.innerHTML += '<br><br><input type="text" placeholder="Row space (in.)">';
-            controlText.innerHTML += '<br><br><button class="btn btn-default">Update</button>';
+            controlText.innerHTML += '<div id="projectStats" style="font-size:12px;"></div>';
+            controlText.innerHTML += '<div id="systemMatrix" style="font-size:12px;"></div>';
+            controlText.innerHTML += '<br><br><div class="title">Azimuth</div><input id = "azimuth" type="text" placeholder="Azimuth (Deg)">';
+            controlText.innerHTML += '<br><br><div class="title">Tilt</div><input id = "tilt" type="text" placeholder="Tilt (Deg)">';
+            controlText.innerHTML += '<br><br><div class="title">Row Space</div><input id = "rowSpace" type="text" placeholder="Row space (in.)">';
+            controlText.innerHTML += '<br><br><button class="btn btn-default" id="update">Update</button>';
 
             controlUI.appendChild(controlText);
 
@@ -76,9 +82,24 @@
         draw.setMap({{gmap.varname}});
         // event listener to obtain lat/lng coordinates from drawn polygon
         google.maps.event.addListener(draw, 'polygoncomplete', function (polygon) {
+
             var coordinates = polygon.getPath().getArray();
             // requires lat() as lat/lng here are functions not keys in a dictionary
-            panelLayout(polygon, coordinates,  120, 'landscape', 1.6, 30, 235);
+            var projectInfo = new panelLayout(polygon, coordinates,  30, 'landscape', 1.6, 30, 235, system_update);
+
+            var azimuthDefault = document.getElementById('azimuth')
+            var tiltDefault = document.getElementById('tilt')
+            var rowSpaceDefault = document.getElementById('rowSpace')
+
+            var system_update = function(){
+
+                //removes the previous layout
+                projectInfo.systemArray.setMap(null);  
+                //lays out the new design
+                panelLayout(polygon, coordinates,  azimuthDefault.value, 'landscape', rowSpaceDefault.value, tiltDefault.value, 235, system_update);
+            };
+
+            panelLayout(polygon, coordinates,  30, 'landscape', 1.6, 30, 235, system_update);
         });
         function print_coordinates(coordinates) {
             for (var i=0; i < coordinates.length; i++) {
@@ -118,6 +139,7 @@
                      lng: Math.min(...lngRoof)
             }]; // array of [max, min] coordinates
         }
+
         // check if a collection of points falls within a polygon
         function containsPolygon(points_array, polygon) {
             for (var i = 0; i < points_array.length; i++) {
@@ -129,12 +151,20 @@
             }
             return true;
         }
-        function panelLayout(polygon, coordinates, azimuth, orientation, rowSpace, tilt, moduleWattage) {
+
+        // var system_update = function updateSysDesign(){
+        //     var test = new panelLayout(polygon, coordinates,  30, 'landscape', 1.6, 30, 235, system_update);
+        //     alert(test.tiltSpec)
+        // }
+
+        function panelLayout(polygon, coordinates, azimuth, orientation, rowSpace, tilt, moduleWattage, updateFunc) {
             //azimuth - angle of panel from true North
             //tilt - angle of panel from ground - not working properly for portrait..might be the difference between latitude/longitude conversion from meters
             //rowSpace - space between rows 
             //orientation - 'landscape' or 'portrait'
             //moduleWattage - wattage of each panel
+
+            document.getElementById('update').onmouseup = updateFunc;
 
             print_coordinates(coordinates);
 
@@ -245,8 +275,10 @@
                     // add panel to solar system array
                     solarSystem.push(panelCoords);
                 }
-            }
-            new google.maps.Polygon({ 
+            } //end of for loop
+
+
+            panelArray = new google.maps.Polygon({ 
                 map: map,
                 paths: solarSystem,
                 strokeColor: 'grey',
@@ -256,11 +288,26 @@
                 fillOpacity: 1
             });
 
+            document.getElementById('update').onmousedown = function(){
+            
+            panelArray.setMap(null);
+
+            }
+
+            this.tiltSpec = tilt;
+            this.azimuthSpec = azimuth;
+            this.rowSpaceSpec = rowSpace;
+            this.systemArray = panelArray;
+        
             //calculates the nameplace capacity of the system on the rooftop
             var systemCapacity = moduleWattage * solarSystem.length/1000;
+            var numPanels = solarSystem.length;
 
             //displays the nameplace capacity
-            document.getElementById("projectStats").innerHTML = "Nameplate Capacity: " + systemCapacity + "kW";
+            var project_stats = document.getElementById("projectStats")
+            project_stats.innerHTML = "Nameplate Capacity: " + systemCapacity + "kW<br>";
+
+            project_stats.innerHTML += "# of panels: " + numPanels;
 
             //Creates shape of maximum panel area for testing. Comment out to layer max rectangle around clicked polygon
             // new google.maps.Polygon({ 
@@ -272,7 +319,11 @@
             //     fillColor: 'red',
             //     fillOpacity: 0.4
             // });
-        }
+            
+
+        } //end of panelLayout function
+
+
         {% for icon in gmap.markers %}
             {% for marker in gmap.markers[icon] %}
                 var marker_{{loop.index0}} = new google.maps.Marker({
@@ -311,6 +362,7 @@
         }
         {{gmap.varname}}.fitBounds(bounds);
     }
+
     function getInfoCallback(map, content) {
         var infowindow = new google.maps.InfoWindow({content: content});
         return function() {
