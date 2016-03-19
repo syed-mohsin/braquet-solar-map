@@ -125,21 +125,25 @@
             }
         });
         draw.setMap({{gmap.varname}});
-        // event listener to obtain lat/lng coordinates from drawn polygon
+
+        // event listener to obtain lat/lng coordinates from drawn polygon **************
         google.maps.event.addListener(draw, 'polygoncomplete', function (polygon) {
             // switch back to the hand option
             draw.setOptions({
                 drawingMode: null
             });
 
+            // get array of vertices in lat/lng format of polygon
+            var coordinates = polygon.getPath().getArray();
+
             var azimuthValue = 120;
             var orientationValue = 'portrait';
             var rowSpaceValue = 1.6;
             var tiltValue = 30;
             var moduleWattage = 235;
-
-            // get array of vertices in lat/lng format of polygon
-            var coordinates = polygon.getPath().getArray();
+            var systemCapacity = 10;
+            var latlngCenter = getPolygonCenter(coordinates); // updated in panelLayout()
+            console.log("center points: " + latlngCenter.lat() + ", " + latlngCenter.lng());
 
             // listener for drag event
             google.maps.event.addListener(polygon, "dragend", function() {
@@ -174,9 +178,11 @@
                 $.ajax({
                     type : "POST",
                     url  : "/nrel",
-                    data : JSON.stringify({"tilt"     : tiltValue, 
+                    data : JSON.stringify({"lat"      : latlngCenter.lat(),
+                                           "lng"      : latlngCenter.lng(),
+                                           "tilt"     : tiltValue, 
                                            "azimuth"  : azimuthValue,
-                                           "capacity" : "9.87"}, 
+                                           "capacity" : systemCapacity}, 
                                            null, '\t'),
                     contentType: 'application/json; charset=UTF-8',
                     success: function(result) {
@@ -210,7 +216,15 @@
             panelLayout(polygon, coordinates,  120, 'portrait', 1.6, 30, 235);
         });
 
-        function print_coordinates(coordinates) {
+        function getPolygonCenter(coordinates) {
+            var bound = new google.maps.LatLngBounds();
+            for (var i=0;i<coordinates.length; i++) {
+                bound.extend( new google.maps.LatLng(coordinates[i].lat(), coordinates[i].lng()));
+            }
+            return bound.getCenter();
+        }
+
+        function printCoordinates(coordinates) {
             for (var i=0; i < coordinates.length; i++) {
                 var xy = coordinates[i];
                 // requires lat()/lng() as lat/lng here are functions not keys in a dictionary
@@ -269,8 +283,8 @@
             //orientation - 'landscape' or 'portrait'
             //moduleWattage - wattage of each panel
 
-
-            print_coordinates(coordinates);
+            latlngCenter = getPolygonCenter(coordinates);
+            printCoordinates(coordinates);
             //tilt multiplier to adjust how the panel would look tilted
             var tilt_coeff = Math.cos(tilt*Math.PI/180);
             //solar spec before tilt is considered
@@ -383,7 +397,7 @@
                 fillOpacity: 1
             });
 
-            var systemCapacity = moduleWattage * solarSystem.length/1000;
+            systemCapacity = moduleWattage * solarSystem.length/1000;
             var numPanels = solarSystem.length;
 
             var project_stats = document.getElementById("projectStats")

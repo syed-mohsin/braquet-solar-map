@@ -59,13 +59,21 @@ def mapview():
 def nrel():
 	if request.method == "POST":
 		print request.json
+		lat = str(request.json['lat'])
+		lng = str(request.json['lng'])
+		tilt = str(request.json['tilt'])
+		azimuth = str(request.json['azimuth'])
+		capacity = str(request.json['capacity'])
+
 		response = urllib2.urlopen("https://developer.nrel.gov/api/pvwatts/v5.json?api_key=" + credentials.NREL_API_KEY + \
-			"&lat=41&lon=-105&system_capacity=4&azimuth=180&tilt=40&array_type=1&module_type=1&losses=10")
+			"&lat=" + lat + "&lon=" + lng + "&system_capacity=" + capacity + "&azimuth=" + azimuth + "&tilt=" + tilt + "&array_type=1&module_type=0&losses=10")
 
 		data = json.load(response)
 		print data["outputs"]["dc_monthly"][0] # january output
-
-		return str(data["outputs"]["dc_monthly"][0])
+		if data["outputs"]["dc_monthly"] != None:
+			return str(data["outputs"]["dc_monthly"][0])
+		else:
+			return "error retrieving energy production"
 
 	else:
 		return str("404 ERROR");
