@@ -26,13 +26,7 @@ def mapview():
 		markers=[(37.4419,-122.1419)],
 		style="height:600px;width:1000px;margin:0;"
 	)
-
 	locations = None
-	response = urllib2.urlopen("https://developer.nrel.gov/api/pvwatts/v5.json?api_key=" + credentials.NREL_API_KEY + \
-		"&lat=41&lon=-105&system_capacity=4&azimuth=180&tilt=40&array_type=1&module_type=1&losses=10")
-
-	data = json.load(response)
-	print data["outputs"]["dc_monthly"][0]
 
 	# place markers on map corresponding to retrieved business results
 	if request.method == "POST":
@@ -58,15 +52,18 @@ def mapview():
 @app.route("/nrel", methods =["POST"])
 def nrel():
 	if request.method == "POST":
-		print request.json
 		lat = str(request.json['lat'])
 		lng = str(request.json['lng'])
 		tilt = str(request.json['tilt'])
 		azimuth = str(request.json['azimuth'])
 		capacity = str(request.json['capacity'])
+		print lat, lng, tilt, azimuth, capacity
 
-		response = urllib2.urlopen("https://developer.nrel.gov/api/pvwatts/v5.json?api_key=" + credentials.NREL_API_KEY + \
-			"&lat=" + lat + "&lon=" + lng + "&system_capacity=" + capacity + "&azimuth=" + azimuth + "&tilt=" + tilt + "&array_type=1&module_type=0&losses=10")
+		try:
+			response = urllib2.urlopen("https://developer.nrel.gov/api/pvwatts/v5.json?api_key=" + credentials.NREL_API_KEY + \
+				"&lat=" + lat + "&lon=" + lng + "&system_capacity=" + capacity + "&azimuth=" + azimuth + "&tilt=" + tilt + "&array_type=1&module_type=0&losses=10")
+		except IOError, e:
+			return "ERROR: API call failed"
 
 		data = json.load(response)
 		print data["outputs"]["dc_monthly"][0] # january output
