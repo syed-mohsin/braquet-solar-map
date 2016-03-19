@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response, json, jsonify
 from pymongo import MongoClient
 from googleplaces import GooglePlaces, types, lang
 from geopy.geocoders import Nominatim
@@ -7,7 +7,7 @@ import credentials
 import numpy as np
 from decimal import Decimal
 import json
-import urllib
+import urllib2
 import os
 
 app = Flask(__name__)
@@ -28,34 +28,18 @@ def mapview():
 	)
 
 	locations = None
+	response = urllib2.urlopen("https://developer.nrel.gov/api/pvwatts/v5.json?api_key=" + credentials.NREL_API_KEY + \
+		"&lat=41&lon=-105&system_capacity=4&azimuth=180&tilt=40&array_type=1&module_type=1&losses=10")
+
+	data = json.load(response)
+	print data["outputs"]["dc_monthly"][0]
 
 	# place markers on map corresponding to retrieved business results
 	if request.method == "POST":
 		query = google_places.nearby_search(location=request.form["user_search"], radius=100)
 		markers = [(place.geo_location['lat'], place.geo_location['lng']) for place in query.places]
 
-		# data = []
-		# for place in query.places:
-		# 	if mongo.rooftop_data.find_one({"name": place.name}) == None:
-		# 		place.get_details()
-		# 		data.append({"name": place.name,
-		# 				     "geocode": (str(place.geo_location['lat']), str(place.geo_location['lng'])),
-		# 					 "rooftopCoords": None,
-		# 					 "address": place.formatted_address,
-		# 					 "isProcessed": False
-		# 		})
-
-		# # insert new locations into database
-		# mongo.rooftop_data.insert_many(data)
-
-		# draw rooftop area on map ********************************************************************
 		roof_borders = []
-		for place in query.places:
-			roof = mongo.rooftop_data.find_one({"name": place.name, "isProcessed": True})
-			if roof:
-				border = [{'lat': float(x[0]), 'lng': float(x[1])} for x in roof["rooftopCoords"]]
-				roof_borders.append(border)
-		# *********************************************************************************************
 
 		mymap = Map(
 			identifier="view-side",
@@ -69,16 +53,25 @@ def mapview():
 			zoom=20
 		)
 
-		# obtain business location details
-		# locations = []
-		# for place in query.places:
-		# 	place.get_details()
-		# 	locations.append([place.name, place.formatted_address])
-
-		# download google static maps for image processing
-		# downloadStaticGoogleMaps(markers)
-
 	return render_template('home.html', mymap=mymap, locations=locations)
+
+@app.route("/nrel", methods =["POST"])
+def nrel():
+	if request.method == "POST":
+		print request.json
+		response = urllib2.urlopen("https://developer.nrel.gov/api/pvwatts/v5.json?api_key=" + credentials.NREL_API_KEY + \
+			"&lat=41&lon=-105&system_capacity=4&azimuth=180&tilt=40&array_type=1&module_type=1&losses=10")
+
+		data = json.load(response)
+		print data["outputs"]["dc_monthly"][0] # january output
+
+		return str(data["outputs"]["dc_monthly"][0])
+
+	else:
+		return str("404 ERROR");
+
+
+
 
 if __name__ == "__main__":
 	app.run(debug=True)

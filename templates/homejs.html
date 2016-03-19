@@ -1,4 +1,4 @@
-<script src="//maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing" type="text/javascript">
+<script src="//maps.googleapis.com/maps/api/js?libraries=drawing,places" type="text/javascript">
 </script>
 
 <style type="text/css">
@@ -6,6 +6,22 @@
 </style>
 
 <script type="text/javascript">
+    // courtesy of: http://stackoverflow.com/questions/2499567/how-to-make-a-json-call-to-a-url/2499647#2499647
+    function getJSONP(url, success) {
+        var ud = '_' + +new Date,
+            script = document.createElement('script'),
+            head = document.getElementsByTagName('head')[0] 
+                || document.documentElement;
+
+        window[ud] = function(data) {
+            head.removeChild(script);
+            success && success(data);
+        }
+
+        script.src = url.replace('callback=?', 'callback=' + ud);
+        head.appendChild(script);
+    }
+
     function CenterControl(controlDiv, map) {
             // Set CSS for the control border.
             var controlUI = document.createElement('div');
@@ -54,45 +70,141 @@
             zoom: {{gmap.zoom}},
             mapTypeId: google.maps.MapTypeId.{{gmap.maptype}}
         });
+
+        // position search bar and enable autocomplete
+        var search_input = document.getElementById('user_search');
+        var autocomplete = new google.maps.places.Autocomplete(search_input);
+        autocomplete.bindTo('bounds', {{gmap.varname}});
+
+        {{gmap.varname}}.controls[google.maps.ControlPosition.TOP_CENTER].push(search_input);
+
+        // Get the full place details when the user selects a place from the
+        // list of suggestions.
+        var iw = new google.maps.InfoWindow();
+        var m = new google.maps.Marker({
+            map: {{gmap.varname}}
+        });
+        google.maps.event.addListener(m, 'click', function() {
+            iw.open({{gmap.varname}}, m);
+        });
+
+        google.maps.event.addListener(autocomplete, 'place_changed', function() {
+            iw.close();
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                return;
+            }
+            if (place.geometry.viewport) {
+                {{gmap.varname}}.fitBounds(place.geometry.viewport);
+            } else {
+                {{gmap.varname}}.setCenter(place.geometry.location);
+                {{gmap.varname}}.setZoom(17);
+            }
+        })
+
+        // position center control manager
         var centerControlDiv = document.createElement('div');
         var centerControl = new CenterControl(centerControlDiv, map);
         centerControlDiv.index = 1;
         map.controls[google.maps.ControlPosition.LEFT_TOP].push(centerControlDiv);
         // drawing manager
         var draw = new google.maps.drawing.DrawingManager({
-            drawingMode: google.maps.drawing.OverlayType.POLYGON,
+            drawingMode: null,
             drawingControl: true,
             drawingControlOptions: {
-              position: google.maps.ControlPosition.TOP_CENTER,
+              position: google.maps.ControlPosition.TOP_RIGHT,
               drawingModes: [
                 google.maps.drawing.OverlayType.POLYGON
               ]
             },
-            editable: true,
-            draggable: true,
             polygonOptions: {
                 fillColor: 'yellow',
-                strokeColor: 'yellow'
+                strokeColor: 'yellow',
+                editable: true,
+                draggable: true
             }
         });
         draw.setMap({{gmap.varname}});
         // event listener to obtain lat/lng coordinates from drawn polygon
         google.maps.event.addListener(draw, 'polygoncomplete', function (polygon) {
+            // switch back to the hand option
+            draw.setOptions({
+                drawingMode: null
+            });
+
+            var azimuthValue = 120;
+            var orientationValue = 'portrait';
+            var rowSpaceValue = 1.6;
+            var tiltValue = 30;
+            var moduleWattage = 235;
+
+            // get array of vertices in lat/lng format of polygon
             var coordinates = polygon.getPath().getArray();
 
+            // listener for drag event
+            google.maps.event.addListener(polygon, "dragend", function() {
+                var new_coordinates = polygon.getPath().getArray();
+                panelArray.setMap(null); 
+                panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
+            })
+
+            // listen for edit event on moving existing vertices
+            google.maps.event.addListener(polygon.getPath(), "set_at", function() {
+                var new_coordinates = polygon.getPath().getArray();
+                panelArray.setMap(null); 
+                panelLayout(polygon, coordinates, 120, 'portrait', 1.6, 30, 235);
+            })
+
+            // listen for edit event on adding new vertices
+            google.maps.event.addListener(polygon.getPath(), "insert_at", function() {
+                var new_coordinates = polygon.getPath().getArray();
+                panelArray.setMap(null); 
+                panelLayout(polygon, coordinates, 120, 'portrait', 1.6, 30, 235);
+            })
+
+            // listen for undo edit event on polygon
+            google.maps.event.addListener(polygon.getPath(), "remove_at", function() {
+                var new_coordinates = polygon.getPath().getArray();
+                panelArray.setMap(null); 
+                panelLayout(polygon, coordinates, 120, 'portrait', 1.6, 30, 235);
+            })
+
+            // listener for click on polygon
+            google.maps.event.addListener(polygon, 'click', function () {
+                $.ajax({
+                    type : "POST",
+                    url  : "/nrel",
+                    data : JSON.stringify({"tilt"     : tiltValue, 
+                                           "azimuth"  : azimuthValue,
+                                           "capacity" : "9.87"}, 
+                                           null, '\t'),
+                    contentType: 'application/json; charset=UTF-8',
+                    success: function(result) {
+                        alert("Energy Production: " + result + " kWh");
+                    }  
+                });
+            });
+
+            // listener for update button click
             document.getElementById('update').onmousedown = function(){
+                // check values are not null
+                if (document.getElementById('azimuth').value != "")
+                    azimuthValue = document.getElementById('azimuth').value;
+                if (document.getElementById('tilt').value != "")
+                    tiltValue = document.getElementById('tilt').value;
+                if (document.getElementById('rowSpace').value != "")
+                    rowSpaceValue = document.getElementById('rowSpace').value;
+                if (document.getElementById('orientation').value != "")
+                    orientationValue = document.getElementById('orientation').value;
+                console.log(azimuthValue);
+                console.log(tiltValue);
+                console.log(rowSpaceValue);
+                console.log(orientationValue);
+                
+                panelArray.setMap(null);           
 
-            var azimuthValue = document.getElementById('azimuth').value
-            var tiltValue = document.getElementById('tilt').value
-            var rowSpaceValue = document.getElementById('rowSpace').value
-            var orientationValue = document.getElementById('orientation').value
-            
-            panelArray.setMap(null);           
-
-            panelLayout(polygon, coordinates,  Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, 235);
-
-            }
-
+                panelLayout(polygon, coordinates,  Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, 235);
+            };
 
             // requires lat() as lat/lng here are functions not keys in a dictionary
             panelLayout(polygon, coordinates,  120, 'portrait', 1.6, 30, 235);
