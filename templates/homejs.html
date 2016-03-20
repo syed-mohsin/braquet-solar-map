@@ -7,7 +7,7 @@
 
 <script type="text/javascript">
     function getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, callback) {
-        return $.ajax({
+        $.ajax({
             type : "POST",
             url  : "/nrel",
             data : JSON.stringify({"lat"      : latlngCenter.lat(),
