@@ -145,32 +145,36 @@
             var latlngCenter = getPolygonCenter(coordinates); // updated in panelLayout()
             console.log("center points: " + latlngCenter.lat() + ", " + latlngCenter.lng());
 
+            // ***generate default panel layout independent of other listeners
+            // requires lat() as lat/lng here are functions not keys in a dictionary
+            systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
+
             // listener for drag event
             google.maps.event.addListener(polygon, "dragend", function() {
                 var new_coordinates = polygon.getPath().getArray();
                 panelArray.setMap(null); 
-                panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
+                systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
             })
 
             // listen for edit event on moving existing vertices
             google.maps.event.addListener(polygon.getPath(), "set_at", function() {
                 var new_coordinates = polygon.getPath().getArray();
                 panelArray.setMap(null); 
-                panelLayout(polygon, coordinates, 120, 'portrait', 1.6, 30, 235);
+                systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
             })
 
             // listen for edit event on adding new vertices
             google.maps.event.addListener(polygon.getPath(), "insert_at", function() {
                 var new_coordinates = polygon.getPath().getArray();
                 panelArray.setMap(null); 
-                panelLayout(polygon, coordinates, 120, 'portrait', 1.6, 30, 235);
+                systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
             })
 
             // listen for undo edit event on polygon
             google.maps.event.addListener(polygon.getPath(), "remove_at", function() {
                 var new_coordinates = polygon.getPath().getArray();
                 panelArray.setMap(null); 
-                panelLayout(polygon, coordinates, 120, 'portrait', 1.6, 30, 235);
+                systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
             })
 
             // listener for click on polygon
@@ -209,11 +213,8 @@
                 
                 panelArray.setMap(null);           
 
-                panelLayout(polygon, coordinates,  Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, 235);
+                systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
             };
-
-            // requires lat() as lat/lng here are functions not keys in a dictionary
-            panelLayout(polygon, coordinates,  120, 'portrait', 1.6, 30, 235);
         });
 
         function getPolygonCenter(coordinates) {
@@ -397,7 +398,7 @@
                 fillOpacity: 1
             });
 
-            systemCapacity = moduleWattage * solarSystem.length/1000;
+            var systemCapacity = moduleWattage * solarSystem.length/1000;
             var numPanels = solarSystem.length;
 
             var project_stats = document.getElementById("projectStats")
@@ -414,6 +415,8 @@
             //     fillColor: 'red',
             //     fillOpacity: 0.4
             // });
+
+            return systemCapacity;
         }
 
         {% for icon in gmap.markers %}
