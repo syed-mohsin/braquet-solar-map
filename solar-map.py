@@ -18,6 +18,8 @@ geolocator = Nominatim()
 @app.route("/", methods=["GET", "POST"])
 def mapview():
 
+	logo = "Braquet | Layout"
+
 	# create a map in view
 	mymap = Map(
 		identifier="view-side",
@@ -47,7 +49,7 @@ def mapview():
 			zoom=20
 		)
 
-	return render_template('home.html', mymap=mymap, locations=locations)
+	return render_template('home.html', mymap=mymap, locations=locations, logo=logo)
 
 @app.route("/nrel", methods =["POST"])
 def nrel():

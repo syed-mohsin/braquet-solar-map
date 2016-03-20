@@ -24,7 +24,7 @@
     }
 
     function CenterControl(controlDiv, map) {
-            // Set CSS for the control border.
+             // Set CSS for the control border.
             var controlUI = document.createElement('div');
             controlUI.style.backgroundColor = '#fff';
             controlUI.style.border = '2px solid #fff';
@@ -32,15 +32,16 @@
             controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
             controlUI.style.marginBottom = '22px';
             controlUI.style.padding = '22px';
-            controlUI.style.textAlign = 'center';
+            controlUI.style.textAlign = 'left';
             controlDiv.appendChild(controlUI);
 
             // Set CSS for the control interior.
             var controlText = document.createElement('div');
+            controlText.id = 'settings'
             controlText.style.color = 'rgb(25,25,25)';
             controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
-            controlText.style.fontSize = '16px';
-            controlText.style.lineHeight = '20px';
+            controlText.style.fontSize = '13px';
+            controlText.style.lineHeight = '15px';
             controlText.style.paddingLeft = '5px';
             controlText.style.paddingRight = '5px';
 
@@ -48,11 +49,11 @@
             controlText.innerHTML += '<div id="projectStats" style="font-size:12px;"></div>';
             controlText.innerHTML += '<div id="systemMatrix" style="font-size:12px;"></div>';
             
-            controlText.innerHTML += '<br><br><div class="title">Azimuth</div><input id = "azimuth" type="text" placeholder="Azimuth (Deg)">';            
-            controlText.innerHTML += '<br><br><div class="title">Tilt</div><input id = "tilt" type="text" placeholder="Tilt (Deg)">';
-            controlText.innerHTML += '<br><br><div class="title">Row Space</div><input id = "rowSpace" type="text" placeholder="Row space (in.)">';
-            controlText.innerHTML += '<br><br><select id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select>';
-            controlText.innerHTML += '<br><br><button class="btn btn-default" id="update">Update</button>';
+            controlText.innerHTML += '<br><br><div><span>Azimuth</span><input id = "azimuth" type="text" placeholder="Azimuth (Deg)"></div>';            
+            controlText.innerHTML += '<br><br><div><span>Tilt</span><input id = "tilt" type="text" placeholder="Tilt (Deg)"></div>';
+            controlText.innerHTML += '<br><br><div><span>Row Space</span><input id = "rowSpace" type="text" placeholder="Row space (in.)"></div>';
+            controlText.innerHTML += '<br><br><div><span>Orientation</span><select id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select></div>';
+             controlText.innerHTML += '<br><br><div id="submit"><button class="btn btn-default" id="update">Update</button></div>';
 
             controlUI.appendChild(controlText);
           }
@@ -77,7 +78,7 @@
         var autocomplete = new google.maps.places.Autocomplete(search_input);
         autocomplete.bindTo('bounds', {{gmap.varname}});
 
-        {{gmap.varname}}.controls[google.maps.ControlPosition.TOP_CENTER].push(search_input);
+        //{{gmap.varname}}.controls[google.maps.ControlPosition.TOP_CENTER].push(search_input);
 
         // Get the full place details when the user selects a place from the
         // list of suggestions.

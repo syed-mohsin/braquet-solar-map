@@ -4,14 +4,45 @@
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
             {{mymap.js}}
+
+            <style>
+            #submit {
+                text-align: center;
+            }
+
+            #settings span {
+                margin-right:5px;
+            }
+
+            </style>
     </head>
     <body>
-        <h1>Solar System Design Tool</h1>
 
-        <form action="/" method="post">
-            <input id="user_search" class="controls" placeholder="Search for a region" name="user_search" required/>
-            <button type="submit">Search</button>
-        </form>
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">{{logo}}</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+
+            <li><a href="#contact">
+             <form action="/" method="post">
+                <input id="user_search" class="controls" placeholder="Search for a region" name="user_search" required/>
+                <button type="submit">Search</button>
+            </form>
+            </a></li>
+          </ul>
+          
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
 
         <div id="{{mymap.identifier}}" class="{{mymap.cls}}"></div>
 
