@@ -6,20 +6,21 @@
 </style>
 
 <script type="text/javascript">
-    // courtesy of: http://stackoverflow.com/questions/2499567/how-to-make-a-json-call-to-a-url/2499647#2499647
-    function getJSONP(url, success) {
-        var ud = '_' + +new Date,
-            script = document.createElement('script'),
-            head = document.getElementsByTagName('head')[0] 
-                || document.documentElement;
-
-        window[ud] = function(data) {
-            head.removeChild(script);
-            success && success(data);
-        }
-
-        script.src = url.replace('callback=?', 'callback=' + ud);
-        head.appendChild(script);
+    function getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, callback) {
+        return $.ajax({
+            type : "POST",
+            url  : "/nrel",
+            data : JSON.stringify({"lat"      : latlngCenter.lat(),
+                                   "lng"      : latlngCenter.lng(),
+                                   "tilt"     : tiltValue, 
+                                   "azimuth"  : azimuthValue,
+                                   "capacity" : systemCapacity}, 
+                                   null, '\t'),
+            contentType: 'application/json; charset=UTF-8',
+            success: function (result) {
+                callback(result);
+            }
+        })
     }
 
     function CenterControl(controlDiv, map) {
@@ -143,17 +144,24 @@
             var moduleWattage = 235;
             var systemCapacity = 10;
             var latlngCenter = getPolygonCenter(coordinates); // updated in panelLayout()
+            var energyProduction = 0;
             console.log("center points: " + latlngCenter.lat() + ", " + latlngCenter.lng());
 
             // ***generate default panel layout independent of other listeners
             // requires lat() as lat/lng here are functions not keys in a dictionary
             systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
+            getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
+                energyProduction = data;
+            });
 
             // listener for drag event
             google.maps.event.addListener(polygon, "dragend", function() {
                 var new_coordinates = polygon.getPath().getArray();
                 panelArray.setMap(null); 
                 systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
+                getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
+                    energyProduction = data;
+                });
             })
 
             // listen for edit event on moving existing vertices
@@ -161,6 +169,9 @@
                 var new_coordinates = polygon.getPath().getArray();
                 panelArray.setMap(null); 
                 systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
+                getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
+                    energyProduction = data;
+                });
             })
 
             // listen for edit event on adding new vertices
@@ -168,6 +179,9 @@
                 var new_coordinates = polygon.getPath().getArray();
                 panelArray.setMap(null); 
                 systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
+                getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
+                    energyProduction = data;
+                });
             })
 
             // listen for undo edit event on polygon
@@ -175,24 +189,14 @@
                 var new_coordinates = polygon.getPath().getArray();
                 panelArray.setMap(null); 
                 systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
+                getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
+                    energyProduction = data;
+                });
             })
 
             // listener for click on polygon
             google.maps.event.addListener(polygon, 'click', function () {
-                $.ajax({
-                    type : "POST",
-                    url  : "/nrel",
-                    data : JSON.stringify({"lat"      : latlngCenter.lat(),
-                                           "lng"      : latlngCenter.lng(),
-                                           "tilt"     : tiltValue, 
-                                           "azimuth"  : azimuthValue,
-                                           "capacity" : systemCapacity}, 
-                                           null, '\t'),
-                    contentType: 'application/json; charset=UTF-8',
-                    success: function(result) {
-                        alert("Energy Production: " + result + " kWh");
-                    }  
-                });
+                alert("Energy Production " + energyProduction + " kWh");
             });
 
             // listener for update button click
@@ -214,6 +218,9 @@
                 panelArray.setMap(null);           
 
                 systemCapacity = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
+                getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
+                    energyProduction = data;
+                });
             };
         });
 
