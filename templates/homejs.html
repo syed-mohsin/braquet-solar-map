@@ -24,7 +24,10 @@
     }
     function CenterControl(controlDiv, map) {
              // Set CSS for the control border.
-            var controlUI = document.createElement('div');
+            var controlUI = document.createElement('form');
+            controlUI.id = 'control'
+            controlUI.className = 'form-inline'
+
             controlUI.style.backgroundColor = '#fff';
             controlUI.style.border = '2px solid #fff';
             controlUI.style.borderRadius = '3px';
@@ -42,14 +45,14 @@
             controlText.style.lineHeight = '15px';
             controlText.style.paddingLeft = '5px';
             controlText.style.paddingRight = '5px';
-            controlText.innerHTML = 'Walmart Project Settings';
+            controlText.innerHTML = '<h4>Project Settings</h4>';
             controlText.innerHTML += '<div id="projectStats" style="font-size:12px;"></div>';
             controlText.innerHTML += '<div id="systemMatrix" style="font-size:12px;"></div>';
             
-            controlText.innerHTML += '<br><br><div><span>Azimuth</span><input id = "azimuth" type="text" placeholder="Azimuth (Deg)"></div>';            
-            controlText.innerHTML += '<br><br><div><span>Tilt</span><input id = "tilt" type="text" placeholder="Tilt (Deg)"></div>';
-            controlText.innerHTML += '<br><br><div><span>Row Space</span><input id = "rowSpace" type="text" placeholder="Row space (in.)"></div>';
-            controlText.innerHTML += '<br><br><div><span>Orientation</span><select id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select></div>';
+            controlText.innerHTML += '<input class="form-control" id = "azimuth" type="text" placeholder="Azimuth (Deg)">';            
+            controlText.innerHTML += '<input class="form-control" id = "tilt" type="text" placeholder="Tilt (Deg)">';
+            controlText.innerHTML += '<input class="form-control" id = "rowSpace" type="text" placeholder="Row space (in.)">';
+            controlText.innerHTML += '<select class="form-control" id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select>';
              controlText.innerHTML += '<br><br><div id="submit"><button class="btn btn-default" id="update">Update</button></div>';
             controlUI.appendChild(controlText);
           }
@@ -98,7 +101,7 @@
         var centerControlDiv = document.createElement('div');
         var centerControl = new CenterControl(centerControlDiv, map);
         centerControlDiv.index = 1;
-        map.controls[google.maps.ControlPosition.LEFT_TOP].push(centerControlDiv);
+        map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(centerControlDiv);
         // drawing manager
         var draw = new google.maps.drawing.DrawingManager({
             drawingMode: null,

@@ -1,13 +1,51 @@
 <!DOCTYPE html>
     <html>
     <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link href='https://fonts.googleapis.com/css?family=Maven+Pro:400,500,700,900' rel='stylesheet' type='text/css'>
+            <link rel='shortcut icon' href='/static/small_logo.png' type='image/x-icon'/ >
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-            <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+            <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+
+
             {{mymap.js}}
 
             <style>
+
+            html * {
+                font-family: Maven Pro;
+            }
+
+            #logo {
+                width:150px;
+            }
+
+            input {
+                margin-bottom: 15px;
+                margin-right: 10px;
+            }
+
+            #control {
+                width: 440px;
+            }
+
+            #orientation {
+                vertical-align: super;
+            }
+
             #submit {
                 text-align: center;
+                margin-bottom: 40px;
+            }
+
+            #update {
+                color:white;
+                background:black;
+                width:80%;
+                font-weight: 300;
             }
 
             #settings span {
@@ -18,29 +56,33 @@
     </head>
     <body>
 
-    <nav class="navbar navbar-default navbar-static-top">
-      <div class="container">
+    <nav class="navbar navbar-inverse" style="background:black;">
+      <div class="container-fluid">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>                        
           </button>
-          <a class="navbar-brand" href="#">{{logo}}</a>
+          <a href="#">
+              <img id="logo" src="/static/full_logo.png">
+          </a>
         </div>
-        <div id="navbar" class="navbar-collapse collapse">
+        <div class="collapse navbar-collapse" id="myNavbar">
           <ul class="nav navbar-nav">
-
-            <li><a href="#contact">
-             <form action="/" method="post">
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+              <form action="/" method="post">
                 <input id="user_search" class="controls" placeholder="Search for a region" name="user_search" required/>
                 <button type="submit">Search</button>
-            </form>
-            </a></li>
+              </form>
+                 
+              </a>
+            </li>
           </ul>
-          
-        </div><!--/.nav-collapse -->
+          <ul class="nav navbar-nav navbar-right">
+          </ul>
+        </div>
       </div>
     </nav>
 
@@ -55,5 +97,14 @@
             {% endfor %}
         {% endif %}
 
+        <script>
+        //makes the map full-screen
+        document.getElementById('view-side').style.width = '100%'
+        document.getElementById('view-side').style.height = '100vh'
+        document.getElementsByClassName('navbar')[0].style.marginBottom ='0px'
+"0px"
+        </script>
+
+        
     </body>
 </html>
