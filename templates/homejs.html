@@ -22,7 +22,6 @@
             }
         })
     }
-
     function CenterControl(controlDiv, map) {
              // Set CSS for the control border.
             var controlUI = document.createElement('div');
@@ -34,7 +33,6 @@
             controlUI.style.padding = '22px';
             controlUI.style.textAlign = 'left';
             controlDiv.appendChild(controlUI);
-
             // Set CSS for the control interior.
             var controlText = document.createElement('div');
             controlText.id = 'settings'
@@ -44,7 +42,6 @@
             controlText.style.lineHeight = '15px';
             controlText.style.paddingLeft = '5px';
             controlText.style.paddingRight = '5px';
-
             controlText.innerHTML = 'Walmart Project Settings';
             controlText.innerHTML += '<div id="projectStats" style="font-size:12px;"></div>';
             controlText.innerHTML += '<div id="systemMatrix" style="font-size:12px;"></div>';
@@ -54,10 +51,8 @@
             controlText.innerHTML += '<br><br><div><span>Row Space</span><input id = "rowSpace" type="text" placeholder="Row space (in.)"></div>';
             controlText.innerHTML += '<br><br><div><span>Orientation</span><select id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select></div>';
              controlText.innerHTML += '<br><br><div id="submit"><button class="btn btn-default" id="update">Update</button></div>';
-
             controlUI.appendChild(controlText);
           }
-
     // function systemUpdate(){
     //     //var projectInfo = new panelLayout(polygon, coordinates,  30, 'landscape', 1.6, 30, 235);
     //     //projectInfo.systemArray.setMap(null);  
@@ -72,14 +67,11 @@
             zoom: {{gmap.zoom}},
             mapTypeId: google.maps.MapTypeId.{{gmap.maptype}}
         });
-
         // position search bar and enable autocomplete
         var search_input = document.getElementById('user_search');
         var autocomplete = new google.maps.places.Autocomplete(search_input);
         autocomplete.bindTo('bounds', {{gmap.varname}});
-
         //{{gmap.varname}}.controls[google.maps.ControlPosition.TOP_CENTER].push(search_input);
-
         // Get the full place details when the user selects a place from the
         // list of suggestions.
         var iw = new google.maps.InfoWindow();
@@ -89,7 +81,6 @@
         google.maps.event.addListener(m, 'click', function() {
             iw.open({{gmap.varname}}, m);
         });
-
         google.maps.event.addListener(autocomplete, 'place_changed', function() {
             iw.close();
             var place = autocomplete.getPlace();
@@ -103,7 +94,6 @@
                 {{gmap.varname}}.setZoom(17);
             }
         })
-
         // position center control manager
         var centerControlDiv = document.createElement('div');
         var centerControl = new CenterControl(centerControlDiv, map);
@@ -127,17 +117,14 @@
             }
         });
         draw.setMap({{gmap.varname}});
-
         // event listener to obtain lat/lng coordinates from drawn polygon **************
         google.maps.event.addListener(draw, 'polygoncomplete', function (polygon) {
             // switch back to the hand option
             draw.setOptions({
                 drawingMode: null
             });
-
             // get array of vertices in lat/lng format of polygon
             var coordinates = polygon.getPath().getArray();
-
             var azimuthValue = 120;
             var orientationValue = 'portrait';
             var rowSpaceValue = 1.6;
@@ -149,7 +136,6 @@
             var pArray = null;
             var output = null;
             console.log("center points: " + latlngCenter.lat() + ", " + latlngCenter.lng());
-
             // ***generate default panel layout independent of other listeners
             // requires lat() as lat/lng here are functions not keys in a dictionary
             output = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
@@ -162,7 +148,6 @@
                     alert("Energy Production " + energyProduction + " kWh");
                 });
             });
-
             // listener for drag event
             google.maps.event.addListener(polygon, "dragend", function() {
                 var new_coordinates = polygon.getPath().getArray();
@@ -175,7 +160,6 @@
                     energyProduction = data;
                 });
             })
-
             // listen for edit event on moving existing vertices
             google.maps.event.addListener(polygon.getPath(), "set_at", function() {
                 var new_coordinates = polygon.getPath().getArray();
@@ -188,7 +172,6 @@
                     energyProduction = data;
                 });
             })
-
             // listen for edit event on adding new vertices
             google.maps.event.addListener(polygon.getPath(), "insert_at", function() {
                 var new_coordinates = polygon.getPath().getArray();
@@ -201,7 +184,6 @@
                     energyProduction = data;
                 });
             })
-
             // listen for undo edit event on polygon
             google.maps.event.addListener(polygon.getPath(), "remove_at", function() {
                 var new_coordinates = polygon.getPath().getArray();
@@ -214,7 +196,6 @@
                     energyProduction = data;
                 });
             })
-
             // listener for update button click
             document.getElementById('update').onmousedown = function(){
                 // check values are not null
@@ -241,7 +222,6 @@
                 });
             };
         });
-
         function getPolygonCenter(coordinates) {
             var bound = new google.maps.LatLngBounds();
             for (var i=0;i<coordinates.length; i++) {
@@ -249,7 +229,6 @@
             }
             return bound.getCenter();
         }
-
         function printCoordinates(coordinates) {
             for (var i=0; i < coordinates.length; i++) {
                 var xy = coordinates[i];
@@ -271,6 +250,20 @@
             //console.log(distance)
             return Math.max(...distance);
         }
+
+        function maxDistanceXY(roof_area) {
+            var distance = [];
+            for (var i = 0; i < roof_area.length; i++) {
+                for (j = i + 1; j < roof_area.length; j++) {
+                    console.log(roof_area[i].y-roof_area[j].y)
+                    distance.push(Math.sqrt(Math.abs((Math.pow((roof_area[i].x - roof_area[j].x),2) + Math.pow((roof_area[i].x - roof_area[j].x),2)))));
+                    console.log('Distance: ' + Math.sqrt(Math.abs((Math.pow((roof_area[i].x - roof_area[j].x),2) + Math.pow((roof_area[i].x - roof_area[j].x),2)))))
+                }
+            }
+            //console.log(distance)
+            return Math.max(...distance);
+        }
+
         function endCoords(roof_area) {
             var latRoof = [];
             var lngRoof = [];
@@ -300,6 +293,30 @@
             return true;
         }
 
+         function latLngToPoint(latLng) {
+              var siny = Math.sin(latLng.lat * Math.PI / 180);
+
+              // Truncating to 0.9999 effectively limits latitude to 89.189. This is
+              // about a third of a tile past the edge of the world tile.
+              siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+
+              return new google.maps.Point(
+                  TILE_SIZE * (0.5 + latLng.lng / 360),
+                  TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI)));
+            }
+
+        function pointToLatLng(xy){
+
+              var newLng = 360 * (xy.x/TILE_SIZE - 0.5)
+
+              var yConst = Math.pow(Math.E, -4*Math.PI*(xy.y/TILE_SIZE - 0.5))
+
+              var newLat = (180/Math.PI) * Math.asin((yConst - 1)/(1 + yConst))
+
+              var newCoord = {lat: newLat, lng: newLng}
+
+              return newCoord
+            }
 
 
         function panelLayout(polygon, coordinates, azimuth, orientation, rowSpace, tilt, moduleWattage) {
@@ -309,37 +326,63 @@
             //orientation - 'landscape' or 'portrait'
             //moduleWattage - wattage of each panel
 
+            TILE_SIZE = 256;
+
+            latlngCenter = getPolygonCenter(coordinates);
             printCoordinates(coordinates);
+
             //tilt multiplier to adjust how the panel would look tilted
             var tilt_coeff = Math.cos(tilt*Math.PI/180);
             //solar spec before tilt is considered
-            var pre_solar_spec = {width: 0.0000214, length: 0.0000315};
+            var pre_solar_spec = {width: 0.0000314, length: 0.0000214};
+
             if(orientation == 'portrait'){
-                azimuth += 90;
+                azimuth += 180; //not 0 bc it takes into account for the off-set so there are no negative values
                 port = 1;
                 lat = 0;
             } else if(orientation == 'landscape'){
-                azimuth = azimuth
+                azimuth +=90
                 port = 0;
                 lat = 1;
             }
 
-            var solar_spec = {width: Math.pow(tilt_coeff, port) * pre_solar_spec.width, length: Math.pow(tilt_coeff, lat) * pre_solar_spec.length};
-            console.log('Pre Tilt: ' + pre_solar_spec.width + 'Post: ' + solar_spec.width)
-            var row_space = Math.pow(rowSpace, port); // space between row of panels
-            var col_space = Math.pow(rowSpace, lat); // space between column of panels
+            console.log("azimuth " + azimuth)
+
+            var tilt_coeff = Math.cos(tilt*Math.PI/180);
+
+            var solar_spec = {width: Math.pow(tilt_coeff, lat) * pre_solar_spec.width, length:  Math.pow(tilt_coeff, port) * pre_solar_spec.length};
+
+            var row_space = Math.pow(rowSpace, lat); // space between row of panels
+            var col_space = Math.pow(rowSpace, port); // space between column of panels
+
             var radius = Math.sqrt(Math.pow(solar_spec.length / 2, 2) + Math.pow(solar_spec.width / 2, 2));
+            
             // angle between center and a corner point of panel
-            var angleSpread = Math.acos(solar_spec.width / (radius * 2));
+            var angleSpread = Math.atan(solar_spec.width/(solar_spec.length))*2;
+            
             //determines equivalent azimuth for angles over 180 as the layout algorithm only works in one direction    
-            var real_azimuthAngle = azimuth/180*Math.PI + 116.6/180*Math.PI ; //115 degrees is when the two squars line up
+
             //Converts azimuth angle into opposing angle that's under 180 deg. and converts maximum geometry angle 
+            if(azimuth >= 361 && azimuth <= 540){
+                azimuth -= 360;
+            }
+
+            //the panel dimension changes effects the azimuth and this variable is the offsetter for both maxGeo and azimuth
+            azimuthOffSet = (111.44889707494237 - angleSpread*180/Math.PI)/2
+
+            azimuth -= azimuthOffSet;
+
+            var real_azimuthAngle = azimuth/180*Math.PI + 55.1/180*Math.PI; //63 degrees is when the two squars line up
+
+            thetaOffSet = -(8 + azimuthOffSet) * (Math.PI/180)
+
             if(azimuth >= 0 && azimuth <= 90 || azimuth >= 181 && azimuth <= 270) {
-                azimuthAngle = azimuth / 180 * Math.PI - 25 / 180 * Math.PI
-                var theta = -(90 - azimuthAngle + 130 * Math.PI/180);
+                azimuthAngle = -(real_azimuthAngle + Math.PI/2)
+                var theta = (90 - azimuthAngle - thetaOffSet);
+
             } else if(azimuth >= 91 && azimuth <= 180 || azimuth >= 271 && azimuth <= 360){
-                azimuthAngle = (azimuth -180) / 180 * Math.PI - 25 / 180 * Math.PI
-                var theta = -(90 - azimuthAngle + 130 * Math.PI/180 - 90 * Math.PI/180);
+                azimuthAngle = -(real_azimuthAngle + Math.PI/2)
+                var theta = (90 - azimuthAngle - 90 * Math.PI/180 - thetaOffSet);
             }
             //Calculates maximum distance of rectangle outside that fits right ouside the polygon
             var maxArea = endCoords(coordinates);
@@ -347,9 +390,10 @@
             var dlng = Math.abs(maxArea[1].lng - maxArea[0].lng)
             // initialize array for panel indexes
             var solarSystem = []; 
+            var solarSystemXY = []; 
             //Angles to determine where central points of each panel will be in relation to the previous one
-            var angle1 = azimuthAngle + angleSpread + Math.PI
-            var angle2 = azimuthAngle + Math.PI
+            var angle1 = (azimuthAngle + angleSpread + Math.PI)
+            var angle2 = (azimuthAngle + Math.PI)
             //Geometric profile of the biggest possible recentangular area around the user selected polygon
             var maxGeo = [
                 {lat: maxArea[1].lat + dlat*Math.cos(theta)*Math.cos(theta), lng: maxArea[1].lng + dlat*Math.sin(theta)*Math.cos(theta)},
@@ -357,64 +401,93 @@
                 {lat: maxArea[1].lat + dlat - dlat*Math.cos(theta)*Math.cos(theta), lng: maxArea[1].lng + dlng - dlat*Math.sin(theta)*Math.cos(theta)},
                 {lat: maxArea[1].lat + dlng*Math.sin(theta)*Math.cos(theta), lng: maxArea[1].lng + dlng - dlng*Math.cos(theta)*Math.cos(theta)},
             ];
+
+            var maxGeoXY =[]
+
+            for(i=0; i<maxGeo.length; i++){
+                maxGeoXY.push(latLngToPoint(maxGeo[i]))
+            }
+            
+
             //Determines the starting point of the panel layout depending on the azimuth
             if(azimuth >= 0 && azimuth <= 90){
-                var initCorner = 2
+                var initCorner = 0
             } else if(azimuth >= 91 && azimuth <= 180) {
                 var initCorner = 1
             } else if(azimuth >= 181 && azimuth <= 270) {
-                var initCorner = 0
+                var initCorner = 2
             } else if(azimuth >= 271 && azimuth <= 360) {
                 var initCorner = 3
             }
             // determines max number of rows/columns in a solar system
             var maxD2 = maxDistance(maxGeo);
+            var maxD2XY = maxDistanceXY(maxGeoXY)
             var smallerDimPanel = Math.min(solar_spec.width, solar_spec.length)
+
             var num_col = Math.round(maxD2 / smallerDimPanel);
             var num_row = num_col;
+
+            var num_colXY = Math.round(maxD2XY / smallerDimPanel);
+            var num_rowXY = num_colXY;
+
             // lays out panel over the polygon and determines if it's in the polygon or not
-            for (j = 0; j < num_col; j++) {
-                for (i = 0; i < num_row; i++) {
-                    var panelCoords = [];
-                    var centerPanelCoord = {
-                        lat: maxGeo[initCorner].lat + radius * Math.cos(angle2) * (row_space*i - col_space*j) + radius * Math.cos(angle1) * (row_space*i + col_space*j),
-                        lng: maxGeo[initCorner].lng + radius * Math.sin(angle2) * (row_space*i - col_space*j) + radius * Math.sin(angle1) * (row_space*i + col_space*j)
+
+            for (j = 0; j < num_colXY; j++) {
+                for (i = 0; i < num_rowXY; i++) {
+                    var panelCoordsXY = [];
+                    var centerPanelCoordXY = {
+
+                        x: maxGeoXY[initCorner].x + radius * Math.sin(angle2) * ((row_space*i - col_space*j)) + radius * Math.sin(angle1) * ((row_space*i + col_space*j)),
+                        y: maxGeoXY[initCorner].y + radius * Math.cos(angle2) * (row_space*i - col_space*j) + radius * Math.cos(angle1) * (row_space*i + col_space*j)
+                        
                     };
+
                      // start populating rooftop from min lat, max lng ==> bottom right of panel
-                    var pv_corner_array = [
+                    var pv_corner_arrayXY = [
                     {   // min lat, max lng ==> bottom right of panel
-                        lat: centerPanelCoord.lat + radius * Math.cos(azimuthAngle),
-                        lng: centerPanelCoord.lng + radius * Math.sin(azimuthAngle)
+                        x: centerPanelCoordXY.x + radius * Math.sin(azimuthAngle),
+                        y: centerPanelCoordXY.y + radius * Math.cos(azimuthAngle)
+                        
                     },
                    {   // min lat, min lng ==> bottom left of panel
-                        lat: centerPanelCoord.lat + radius * Math.cos(azimuthAngle + angleSpread),
-                        lng: centerPanelCoord.lng + radius * Math.sin(azimuthAngle + angleSpread)
+                        x: centerPanelCoordXY.x + radius * Math.sin(azimuthAngle + angleSpread),
+                        y: centerPanelCoordXY.y + radius * Math.cos(azimuthAngle + angleSpread)
+                        
                     },
                     {   // max lat, min lng top left of panel
-                        lat: centerPanelCoord.lat + radius * Math.cos(azimuthAngle + Math.PI),
-                        lng: centerPanelCoord.lng + radius * Math.sin(azimuthAngle + Math.PI)
+                        x: centerPanelCoordXY.x + radius * Math.sin(azimuthAngle + Math.PI),
+                        y: centerPanelCoordXY.y + radius * Math.cos(azimuthAngle + Math.PI)
+                        
                     },
                     {   // max lat, max lng ==> top right of panel
-                        lat: centerPanelCoord.lat + radius * Math.cos(azimuthAngle + angleSpread + Math.PI),
-                        lng: centerPanelCoord.lng + radius * Math.sin(azimuthAngle + angleSpread + Math.PI)
+                        x: centerPanelCoordXY.x + radius * Math.sin(azimuthAngle + angleSpread + Math.PI),
+                        y: centerPanelCoordXY.y + radius * Math.cos(azimuthAngle + angleSpread + Math.PI)
+                        
                     }
                     ];
+
+                    for(n=0; n<pv_corner_arrayXY.length; n++){
+                        pv_corner_arrayXY[n] = pointToLatLng(pv_corner_arrayXY[n])
+                    }
+
                     //check if any corners are not within our rooftop polygon
-                    if (containsPolygon(pv_corner_array, polygon) === false) {
+                    if (containsPolygon(pv_corner_arrayXY, polygon) === false) {
                         continue;
                     }
-                    // add panel to panel array
-                    for (m = 0; m < pv_corner_array.length; m++) {
-                        panelCoords.push(pv_corner_array[m]);
+                    //add panel to panel array
+                    
+                    for (m = 0; m < pv_corner_arrayXY.length; m++) {
+                        panelCoordsXY.push(pv_corner_arrayXY[m]);
                     }
                     
                     // add panel to solar system array
-                    solarSystem.push(panelCoords);
+                    solarSystemXY.push(panelCoordsXY);
                 }
             }
+
             panelArray = new google.maps.Polygon({ 
                 map: map,
-                paths: solarSystem,
+                paths: solarSystemXY,
                 strokeColor: 'grey',
                 strokeOpacity: 1,
                 strokeWeight: 1,
@@ -422,8 +495,8 @@
                 fillOpacity: 1
             });
 
-            var systemCapacity = moduleWattage * solarSystem.length/1000;
-            var numPanels = solarSystem.length;
+            var systemCapacity = moduleWattage * solarSystemXY.length/1000;
+            var numPanels = solarSystemXY.length;
 
             var project_stats = document.getElementById("projectStats")
             project_stats.innerHTML = "Nameplate Capacity: " + systemCapacity + "kW<br>";
@@ -443,9 +516,8 @@
             return { p: polygon,
                      s: systemCapacity,
                      arr: panelArray,
-            };
+                    }
         }
-
         {% for icon in gmap.markers %}
             {% for marker in gmap.markers[icon] %}
                 var marker_{{loop.index0}} = new google.maps.Marker({
@@ -484,9 +556,6 @@
         }
         {{gmap.varname}}.fitBounds(bounds);
     }
-
-
-
     function getInfoCallback(map, content) {
         var infowindow = new google.maps.InfoWindow({content: content});
         return function() {
@@ -494,6 +563,5 @@
                 infowindow.open(map, this);
             };
     }
-
     google.maps.event.addDomListener(window, 'load', initialize_{{gmap.varname}});
 </script>
