@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, Response, json, jsonify
 from pymongo import MongoClient
 from googleplaces import GooglePlaces, types, lang
-from geopy.geocoders import Nominatim
+# from geopy.geocoders import Nominatim
 from gmap import Map
 import credentials
 import numpy as np
