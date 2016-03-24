@@ -25,7 +25,7 @@
 
     function CenterControl(controlDiv, map) {
          // Set CSS for the control border.
-        var controlUI = document.createElement('form');
+        var controlUI = document.createElement('div');
         controlUI.id = 'control'
         controlUI.className = 'form-inline'
 
@@ -50,13 +50,76 @@
         controlText.innerHTML += '<div id="projectStats" style="font-size:12px;"></div>';
         controlText.innerHTML += '<div id="systemMatrix" style="font-size:12px;"></div>';
         
-        controlText.innerHTML += '<input class="form-control" id = "azimuth" type="text" placeholder="Azimuth (Deg)">';            
-        controlText.innerHTML += '<input class="form-control" id = "tilt" type="text" placeholder="Tilt (Deg)">';
-        controlText.innerHTML += '<input class="form-control" id = "rowSpace" type="text" placeholder="Row space (in.)">';
+        controlText.innerHTML += '<input class="form-control" id ="azimuth" type="text" placeholder="Azimuth (Deg)">';            
+        controlText.innerHTML += '<input class="form-control" id ="tilt" type="text" placeholder="Tilt (Deg)">';
+        controlText.innerHTML += '<input class="form-control" id ="rowSpace" type="text" placeholder="Row space (in.)">';
         controlText.innerHTML += '<select class="form-control" id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select>';
         controlText.innerHTML += '<br><br><div id="submit"><button class="btn btn-default" id="update">Update</button></div>';
         controlUI.appendChild(controlText);
     }
+
+    function updateSystem() {
+        // listener for update button click
+        document.getElementById('update').onmousedown = function(){
+            var selected_polygon = getSelectedPolygon();
+            console.log("click status: " + selected_polygon.click_status);
+
+            // check values are not null
+            if (document.getElementById('azimuth').value != "")
+                selected_polygon.azimuthValue = document.getElementById('azimuth').value;
+            if (document.getElementById('tilt').value != "")
+                selected_polygon.tiltValue = document.getElementById('tilt').value;
+            if (document.getElementById('rowSpace').value != "")
+                selected_polygon.rowSpaceValue = document.getElementById('rowSpace').value;
+            if (document.getElementById('orientation').value != "")
+                selected_polygon.orientationValue = document.getElementById('orientation').value;
+            console.log(selected_polygon.azimuthValue);
+            console.log(selected_polygon.tiltValue);
+            console.log(selected_polygon.rowSpaceValue);
+            console.log(selected_polygon.orientationValue);
+            
+            selected_polygon.pArray.setMap(null); 
+            output = panelLayout(selected_polygon.polygon, 
+                                 selected_polygon.coordinates, 
+                                 Number(selected_polygon.azimuthValue), 
+                                 selected_polygon.orientationValue, 
+                                 selected_polygon.rowSpaceValue, 
+                                 selected_polygon.tiltValue, 
+                                 selected_polygon.moduleWattage);
+            selected_polygon.systemCapacity = output["s"];
+            selected_polygon.pArray = output["arr"];
+            selected_polygon.latlngCenter = getPolygonCenter(selected_polygon.coordinates);
+            getEnergyProduction(selected_polygon.latlngCenter, 
+                        selected_polygon.tiltValue, selected_polygon.azimuthValue, 
+                        selected_polygon.systemCapacity, function(data) {
+                selected_polygon.energyProduction = data;
+            });
+        };
+    }
+
+    function selectPolygon(polygon_object) {
+        unselectAllPolygons();
+        polygon_object.click_status = 1;
+        polygon_object.polygon.setOptions({fillColor: 'green',
+                                           strokeColor: 'green'})
+    }
+
+    function getSelectedPolygon() {
+        for (i=0;i<polygons.length;i++) {
+            if (polygons[i].click_status == 1)
+                return polygons[i];
+        }
+    }
+
+    function unselectAllPolygons() {
+        for (i=0;i<polygons.length;i++) {
+            if (polygons[i].click_status == 1) {
+                polygons[i].click_status = 0;
+                polygons[i].polygon.setOptions({fillColor: 'yellow',
+                                                strokeColor: 'yellow'});
+            }
+        }
+    }    
     
     function printCoordinates(coordinates) {
         for (var i=0; i < coordinates.length; i++) {
@@ -379,7 +442,6 @@
     var polygons = [];
     var {{gmap.varname}};
 
-    
     function initialize_{{gmap.varname}}() {
         var markers = [];
         {{gmap.varname}} = new google.maps.Map(
@@ -451,6 +513,9 @@
             // get array of vertices in lat/lng format of polygon
             var output = null;
 
+            // select this polygon and unselect all others
+            selectPolygon(p);
+
             // ***generate default panel layout independent of other listeners
             // requires lat() as lat/lng here are functions not keys in a dictionary
             output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
@@ -460,6 +525,8 @@
                 p.energyProduction = data;
                 // listener for click on polygon
                 google.maps.event.addListener(p.polygon, 'click', function () {
+                    // select this polygon and unselect all others
+                    selectPolygon(p);
                     alert("Energy Production " + p.energyProduction + " kWh");
                 });
             });
@@ -511,32 +578,27 @@
                     p.energyProduction = data;
                 });
             })
-            // listener for update button click
-            document.getElementById('update').onmousedown = function(){
-                // check values are not null
-                if (document.getElementById('azimuth').value != "")
-                    p.azimuthValue = document.getElementById('azimuth').value;
-                if (document.getElementById('tilt').value != "")
-                    p.tiltValue = document.getElementById('tilt').value;
-                if (document.getElementById('rowSpace').value != "")
-                    p.rowSpaceValue = document.getElementById('rowSpace').value;
-                if (document.getElementById('orientation').value != "")
-                    p.orientationValue = document.getElementById('orientation').value;
-                console.log(azimuthValue);
-                console.log(tiltValue);
-                console.log(rowSpaceValue);
-                console.log(orientationValue);
-                
-                p.pArray.setMap(null); 
-                output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
-                p.systemCapacity = output["s"];
-                p.pArray = output["arr"];
-                p.latlngCenter = getPolygonCenter(p.coordinates);
-                getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
-                    p.energyProduction = data;
-                });
-            };
+
+            // listen for mouseover polygon event
+            google.maps.event.addListener(polygon, "mouseover", function() {
+                p.polygon.setOptions({fillColor: "orange",
+                                      strokeColor: "orange"})
+            })
+
+            // listen for mouse out polygon event
+            google.maps.event.addListener(polygon, "mouseout", function() {
+                if(p.click_status == 0) // unselected
+                    p.polygon.setOptions({fillColor: "yellow",
+                                      strokeColor: "yellow"})
+                else // selected
+                    p.polygon.setOptions({fillColor: "green",
+                                      strokeColor: "green"})
+            })
+
+            // update array upon parameter changes in control box
+            updateSystem();
         });
+
         
         
         {% for icon in gmap.markers %}
