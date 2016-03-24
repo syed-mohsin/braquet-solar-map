@@ -22,45 +22,75 @@
             }
         })
     }
-    function CenterControl(controlDiv, map) {
-             // Set CSS for the control border.
-            var controlUI = document.createElement('form');
-            controlUI.id = 'control'
-            controlUI.className = 'form-inline'
 
-            controlUI.style.backgroundColor = '#fff';
-            controlUI.style.border = '2px solid #fff';
-            controlUI.style.borderRadius = '3px';
-            controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-            controlUI.style.marginBottom = '22px';
-            controlUI.style.padding = '22px';
-            controlUI.style.textAlign = 'left';
-            controlDiv.appendChild(controlUI);
-            // Set CSS for the control interior.
-            var controlText = document.createElement('div');
-            controlText.id = 'settings'
-            controlText.style.color = 'rgb(25,25,25)';
-            controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
-            controlText.style.fontSize = '13px';
-            controlText.style.lineHeight = '15px';
-            controlText.style.paddingLeft = '5px';
-            controlText.style.paddingRight = '5px';
-            controlText.innerHTML = '<h4>Project Settings</h4>';
-            controlText.innerHTML += '<div id="projectStats" style="font-size:12px;"></div>';
-            controlText.innerHTML += '<div id="systemMatrix" style="font-size:12px;"></div>';
-            
-            controlText.innerHTML += '<input class="form-control" id = "azimuth" type="text" placeholder="Azimuth (Deg)">';            
-            controlText.innerHTML += '<input class="form-control" id = "tilt" type="text" placeholder="Tilt (Deg)">';
-            controlText.innerHTML += '<input class="form-control" id = "rowSpace" type="text" placeholder="Row space (in.)">';
-            controlText.innerHTML += '<select class="form-control" id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select>';
-             controlText.innerHTML += '<br><br><div id="submit"><button class="btn btn-default" id="update">Update</button></div>';
-            controlUI.appendChild(controlText);
-          }
+    function CenterControl(controlDiv, map) {
+         // Set CSS for the control border.
+        var controlUI = document.createElement('form');
+        controlUI.id = 'control'
+        controlUI.className = 'form-inline'
+
+        controlUI.style.backgroundColor = '#fff';
+        controlUI.style.border = '2px solid #fff';
+        controlUI.style.borderRadius = '3px';
+        controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+        controlUI.style.marginBottom = '22px';
+        controlUI.style.padding = '22px';
+        controlUI.style.textAlign = 'left';
+        controlDiv.appendChild(controlUI);
+        // Set CSS for the control interior.
+        var controlText = document.createElement('div');
+        controlText.id = 'settings'
+        controlText.style.color = 'rgb(25,25,25)';
+        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+        controlText.style.fontSize = '13px';
+        controlText.style.lineHeight = '15px';
+        controlText.style.paddingLeft = '5px';
+        controlText.style.paddingRight = '5px';
+        controlText.innerHTML = '<h4>Project Settings</h4>';
+        controlText.innerHTML += '<div id="projectStats" style="font-size:12px;"></div>';
+        controlText.innerHTML += '<div id="systemMatrix" style="font-size:12px;"></div>';
+        
+        controlText.innerHTML += '<input class="form-control" id = "azimuth" type="text" placeholder="Azimuth (Deg)">';            
+        controlText.innerHTML += '<input class="form-control" id = "tilt" type="text" placeholder="Tilt (Deg)">';
+        controlText.innerHTML += '<input class="form-control" id = "rowSpace" type="text" placeholder="Row space (in.)">';
+        controlText.innerHTML += '<select class="form-control" id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select>';
+        controlText.innerHTML += '<br><br><div id="submit"><button class="btn btn-default" id="update">Update</button></div>';
+        controlUI.appendChild(controlText);
+    }
     // function systemUpdate(){
     //     //var projectInfo = new panelLayout(polygon, coordinates,  30, 'landscape', 1.6, 30, 235);
     //     //projectInfo.systemArray.setMap(null);  
     //     alert('meow')
     // }
+
+    function getPolygonCenter(coordinates) {
+        var bound = new google.maps.LatLngBounds();
+        for (var i=0;i<coordinates.length; i++) {
+            bound.extend( new google.maps.LatLng(coordinates[i].lat(), coordinates[i].lng()));
+        }
+        return bound.getCenter();
+    }
+
+    function Polygon(polygon) // polygon object
+    {
+        this.click_status = 0;
+
+        this.polygon = polygon;
+        this.coordinates = polygon.getPath().getArray();
+        this.azimuthValue = 120;
+        this.orientationValue = 'portrait';
+        this.rowSpaceValue = 1.6;
+        this.tiltValue = 30;
+        this.moduleWattage = 235;
+        this.systemCapacity = 10;
+        this.latlngCenter = getPolygonCenter(this.coordinates); // updated in panelLayout()
+        this.energyProduction = 0;
+        this.pArray = null;
+    }
+
+    //***GLOBAL VARIABLES******
+    var polygons = [];
+
     
     function initialize_{{gmap.varname}}() {
         var markers = [];
@@ -126,112 +156,100 @@
             draw.setOptions({
                 drawingMode: null
             });
+
+            // create polygon object
+            var p = new Polygon(polygon);
+            polygons.push(p);
             // get array of vertices in lat/lng format of polygon
-            var coordinates = polygon.getPath().getArray();
-            var azimuthValue = 120;
-            var orientationValue = 'portrait';
-            var rowSpaceValue = 1.6;
-            var tiltValue = 30;
-            var moduleWattage = 235;
-            var systemCapacity = 10;
-            var latlngCenter = getPolygonCenter(coordinates); // updated in panelLayout()
-            var energyProduction = 0;
-            var pArray = null;
             var output = null;
-            console.log("center points: " + latlngCenter.lat() + ", " + latlngCenter.lng());
+
             // ***generate default panel layout independent of other listeners
             // requires lat() as lat/lng here are functions not keys in a dictionary
-            output = panelLayout(polygon, coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
-            systemCapacity = output["s"];
-            pArray = output["arr"];
-            getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
-                energyProduction = data;
+            output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+            p.systemCapacity = output["s"];
+            p.pArray = output["arr"];
+            getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
+                p.energyProduction = data;
                 // listener for click on polygon
-                google.maps.event.addListener(polygon, 'click', function () {
-                    alert("Energy Production " + energyProduction + " kWh");
+                google.maps.event.addListener(p.polygon, 'click', function () {
+                    alert("Energy Production " + p.energyProduction + " kWh");
                 });
             });
             // listener for drag event
             google.maps.event.addListener(polygon, "dragend", function() {
-                var new_coordinates = polygon.getPath().getArray();
-                pArray.setMap(null); 
-                output = panelLayout(polygon, new_coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
-                systemCapacity = output["s"];
-                pArray = output["arr"];
-                latlngCenter = getPolygonCenter(coordinates);
-                getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
-                    energyProduction = data;
+                p.coordinates = polygon.getPath().getArray();
+                p.pArray.setMap(null); 
+                output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+                p.systemCapacity = output["s"];
+                p.pArray = output["arr"];
+                p.latlngCenter = getPolygonCenter(p.coordinates);
+                getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
+                    p.energyProduction = data;
                 });
             })
             // listen for edit event on moving existing vertices
             google.maps.event.addListener(polygon.getPath(), "set_at", function() {
-                var new_coordinates = polygon.getPath().getArray();
-                pArray.setMap(null); 
-                output = panelLayout(polygon, new_coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
-                systemCapacity = output["s"];
-                pArray = output["arr"];
-                latlngCenter = getPolygonCenter(coordinates);
-                getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
-                    energyProduction = data;
+                p.coordinates = polygon.getPath().getArray();
+                p.pArray.setMap(null); 
+                output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+                p.systemCapacity = output["s"];
+                p.pArray = output["arr"];
+                p.latlngCenter = getPolygonCenter(p.coordinates);
+                getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
+                    p.energyProduction = data;
                 });
             })
             // listen for edit event on adding new vertices
             google.maps.event.addListener(polygon.getPath(), "insert_at", function() {
-                var new_coordinates = polygon.getPath().getArray();
-                pArray.setMap(null); 
-                output = panelLayout(polygon, new_coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
-                systemCapacity = output["s"];
-                pArray = output["arr"];
-                latlngCenter = getPolygonCenter(coordinates);
-                getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
-                    energyProduction = data;
+                p.coordinates = polygon.getPath().getArray();
+                p.pArray.setMap(null); 
+                output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+                p.systemCapacity = output["s"];
+                p.pArray = output["arr"];
+                p.latlngCenter = getPolygonCenter(p.coordinates);
+                getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
+                    p.energyProduction = data;
                 });
             })
             // listen for undo edit event on polygon
             google.maps.event.addListener(polygon.getPath(), "remove_at", function() {
-                var new_coordinates = polygon.getPath().getArray();
-                pArray.setMap(null); 
-                output = panelLayout(polygon, new_coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
-                systemCapacity = output["s"];
-                pArray = output["arr"];
-                latlngCenter = getPolygonCenter(coordinates);
-                getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
-                    energyProduction = data;
+                p.coordinates = polygon.getPath().getArray();
+                p.pArray.setMap(null); 
+                output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+                p.systemCapacity = output["s"];
+                p.pArray = output["arr"];
+                p.latlngCenter = getPolygonCenter(p.coordinates);
+                getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
+                    p.energyProduction = data;
                 });
             })
             // listener for update button click
             document.getElementById('update').onmousedown = function(){
                 // check values are not null
                 if (document.getElementById('azimuth').value != "")
-                    azimuthValue = document.getElementById('azimuth').value;
+                    p.azimuthValue = document.getElementById('azimuth').value;
                 if (document.getElementById('tilt').value != "")
-                    tiltValue = document.getElementById('tilt').value;
+                    p.tiltValue = document.getElementById('tilt').value;
                 if (document.getElementById('rowSpace').value != "")
-                    rowSpaceValue = document.getElementById('rowSpace').value;
+                    p.rowSpaceValue = document.getElementById('rowSpace').value;
                 if (document.getElementById('orientation').value != "")
-                    orientationValue = document.getElementById('orientation').value;
+                    p.orientationValue = document.getElementById('orientation').value;
                 console.log(azimuthValue);
                 console.log(tiltValue);
                 console.log(rowSpaceValue);
                 console.log(orientationValue);
                 
-                pArray.setMap(null); 
-                output = panelLayout(polygon, new_coordinates, Number(azimuthValue), orientationValue, rowSpaceValue, tiltValue, moduleWattage);
-                systemCapacity = output["s"];
-                pArray = output["arr"];
-                latlngCenter = getPolygonCenter(coordinates);
-                getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, function(data) {
-                    energyProduction = data;
+                p.pArray.setMap(null); 
+                output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+                p.systemCapacity = output["s"];
+                p.pArray = output["arr"];
+                p.latlngCenter = getPolygonCenter(p.coordinates);
+                getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
+                    p.energyProduction = data;
                 });
             };
         });
-        function getPolygonCenter(coordinates) {
-            var bound = new google.maps.LatLngBounds();
-            for (var i=0;i<coordinates.length; i++) {
-                bound.extend( new google.maps.LatLng(coordinates[i].lat(), coordinates[i].lng()));
-            }
-            return bound.getCenter();
-        }
+        
         function printCoordinates(coordinates) {
             for (var i=0; i < coordinates.length; i++) {
                 var xy = coordinates[i];
