@@ -68,9 +68,9 @@ def nrel():
 			return "ERROR: API call failed"
 
 		data = json.load(response)
-		print data["outputs"]["dc_monthly"][0] # january output
+		print data["outputs"]["dc_monthly"][2] # march output
 		if data["outputs"]["dc_monthly"] != None:
-			return str(data["outputs"]["dc_monthly"][0])
+			return str(data["outputs"]["dc_monthly"][2])
 		else:
 			return "error retrieving energy production"
 
