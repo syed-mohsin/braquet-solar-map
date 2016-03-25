@@ -92,8 +92,16 @@
             getEnergyProduction(selected_polygon.latlngCenter, 
                         selected_polygon.tiltValue, selected_polygon.azimuthValue, 
                         selected_polygon.systemCapacity, function(data) {
+                
                 selected_polygon.energyProduction = data;
+                // update table with system info
+                var project_stats = document.getElementById("projectStats")
+                project_stats.innerHTML = "Nameplate Capacity: " + selected_polygon.systemCapacity + "kW<br>";
+                project_stats.innerHTML += "# of panels: " + selected_polygon.numPanels + "<br>";
+                project_stats.innerHTML += "Energy Production: " + selected_polygon.energyProduction + "kWh (monthly)";
             });
+
+            
         };
     }
 
@@ -499,7 +507,7 @@
                 fillColor: 'yellow',
                 strokeColor: 'yellow',
                 editable: true,
-                draggable: true
+                draggable: false
             }
         });
         draw.setMap({{gmap.varname}});
@@ -532,73 +540,67 @@
                 project_stats.innerHTML = "Nameplate Capacity: " + p.systemCapacity + "kW<br>";
                 project_stats.innerHTML += "# of panels: " + p.numPanels + "<br>";
                 project_stats.innerHTML += "Energy Production: " + p.energyProduction + "kWh (monthly)";
-                
+
                 // listener for click on polygon
                 google.maps.event.addListener(p.polygon, 'click', function () {
                     // select this polygon and unselect all others
                     selectPolygon(p);
                 });
+                google.maps.event.addListener(p.pArray, 'click', function () {
+                    // select this polygon and unselect all others
+                    selectPolygon(p);
+                });
+
             });
 
-            // listener for drag event
-            google.maps.event.addListener(polygon, "dragend", function() {
-                p.coordinates = polygon.getPath().getArray();
-                p.pArray.setMap(null); 
-                output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
-                p.systemCapacity = output["s"];
-                p.pArray = output["arr"];
-                p.numPanels = output["numPanels"];
-                p.latlngCenter = getPolygonCenter(p.coordinates);
-                getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
-                    p.energyProduction = data;
-                });
-            })
-
             // listen for edit event on moving existing vertices
-            google.maps.event.addListener(polygon.getPath(), "set_at", function() {
+            google.maps.event.addListener(p.polygon.getPath(), "set_at", function() {
                 selectPolygon(p);
-                p.coordinates = polygon.getPath().getArray();
+                p.coordinates = p.polygon.getPath().getArray();
                 p.pArray.setMap(null); 
-                output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+                output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
                 p.systemCapacity = output["s"];
                 p.pArray = output["arr"];
                 p.numPanels = output["numPanels"];
                 p.latlngCenter = getPolygonCenter(p.coordinates);
                 getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
                     p.energyProduction = data;
+                    selectPolygon(p);
                 });
             })
             // listen for edit event on adding new vertices
-            google.maps.event.addListener(polygon.getPath(), "insert_at", function() {
+            google.maps.event.addListener(p.polygon.getPath(), "insert_at", function() {
                 selectPolygon(p);
-                p.coordinates = polygon.getPath().getArray();
+                p.coordinates = p.polygon.getPath().getArray();
                 p.pArray.setMap(null); 
-                output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+                output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
                 p.systemCapacity = output["s"];
                 p.pArray = output["arr"];
                 p.numPanels = output["numPanels"];
                 p.latlngCenter = getPolygonCenter(p.coordinates);
                 getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
                     p.energyProduction = data;
+                    selectPolygon(p);
                 });
             })
             // listen for undo edit event on polygon
-            google.maps.event.addListener(polygon.getPath(), "remove_at", function() {
+            google.maps.event.addListener(p.polygon.getPath(), "remove_at", function() {
                 selectPolygon(p);
-                p.coordinates = polygon.getPath().getArray();
+                p.coordinates = p.polygon.getPath().getArray();
                 p.pArray.setMap(null); 
-                output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+                output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
                 p.systemCapacity = output["s"];
                 p.pArray = output["arr"];
                 p.numPanels = output["numPanels"];
                 p.latlngCenter = getPolygonCenter(p.coordinates);
                 getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
                     p.energyProduction = data;
+                    selectPolygon(p);
                 });
             })
 
             // listen for mouseover polygon event
-            google.maps.event.addListener(polygon, "mouseover", function() {
+            google.maps.event.addListener(p.polygon, "mouseover", function() {
                 p.polygon.setOptions({fillColor: "orange",
                                       strokeColor: "orange"});
             })
@@ -609,7 +611,7 @@
             })
 
             // listen for mouse out polygon event
-            google.maps.event.addListener(polygon, "mouseout", function() {
+            google.maps.event.addListener(p.polygon, "mouseout", function() {
                 if(p.click_status == 0) // unselected
                     p.polygon.setOptions({fillColor: "yellow",
                                       strokeColor: "yellow"});
