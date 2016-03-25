@@ -11,7 +11,7 @@ import urllib2
 import os
 
 app = Flask(__name__)
-mongo = credentials.connect()
+# mongo = credentials.connect()
 google_places = GooglePlaces(credentials.API_KEY)
 geolocator = Nominatim()
 
