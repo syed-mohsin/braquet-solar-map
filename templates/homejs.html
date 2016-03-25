@@ -394,8 +394,10 @@
             strokeOpacity: 1,
             strokeWeight: 1,
             fillColor: '#084c8d',
-            fillOpacity: 1
+            fillOpacity: 1,
+            zIndex: google.maps.Marker.MAX_ZINDEX
         });
+
 
         var systemCapacity = moduleWattage * solarSystemXY.length/1000;
         var numPanels = solarSystemXY.length;
@@ -543,10 +545,8 @@
                     selectPolygon(p);
                 });
                 google.maps.event.addListener(p.pArray, 'click', function () {
-                    // select this polygon and unselect all others
                     selectPolygon(p);
                 });
-
             });
 
             // listen for edit event on moving existing vertices
@@ -563,6 +563,8 @@
                     p.energyProduction = data;
                     selectPolygon(p);
                 });
+
+                google.maps.event.addListener(p.pArray, 'click', function () { selectPolygon(p); });
             })
             // listen for edit event on adding new vertices
             google.maps.event.addListener(p.polygon.getPath(), "insert_at", function() {
@@ -578,6 +580,8 @@
                     p.energyProduction = data;
                     selectPolygon(p);
                 });
+
+                google.maps.event.addListener(p.pArray, 'click', function () { selectPolygon(p); });
             })
             // listen for undo edit event on polygon
             google.maps.event.addListener(p.polygon.getPath(), "remove_at", function() {
@@ -593,6 +597,8 @@
                     p.energyProduction = data;
                     selectPolygon(p);
                 });
+
+                google.maps.event.addListener(p.pArray, 'click', function () { selectPolygon(p); });
             })
 
             // listen for mouseover polygon event
@@ -601,13 +607,8 @@
                                       strokeColor: "orange"});
             })
 
-            google.maps.event.addListener(p.pArray, "mouseover", function() {
-                p.polygon.setOptions({fillColor: "orange",
-                                      strokeColor: "orange"});
-            })
-
             // listen for mouse out polygon event
-            google.maps.event.addListener(p.polygon, "mouseout", function() {
+            google.maps.event.addListener(p.polygon, "mouseout", function(event) {
                 if(p.click_status == 0) // unselected
                     p.polygon.setOptions({fillColor: "yellow",
                                       strokeColor: "yellow"});
@@ -620,50 +621,7 @@
             updateSystem();
         });
         
-        {% for icon in gmap.markers %}
-            {% for marker in gmap.markers[icon] %}
-                var marker_{{loop.index0}} = new google.maps.Marker({
-                    position: new google.maps.LatLng({{marker.0}}, {{marker.1}}),
-                    map: {{gmap.varname}},
-                    icon: "{{ icon }}"
-                });
-                // for view boundary fitting
-                markers.push(marker_{{loop.index0}}); 
-                {% if gmap.infobox != None %}
-                        {% if gmap.typeflag %}
-                            google.maps.event.addListener(marker_{{loop.index0}}, 'click',
-                            getInfoCallback({{gmap.varname}}, "{{gmap.infobox[loop.index0]|safe}}"));
-                        {% else %}
-                            google.maps.event.addListener(marker_{{loop.index0}}, 'click',
-                            getInfoCallback({{gmap.varname}}, "{{gmap.infobox|safe}}"));
-                        {% endif %}
-                {% endif %}
-            {% endfor %}
-        {% endfor %}
-        {% for border in gmap.roof_borders %}
-            var border_{{loop.index0}} = new google.maps.Polygon({
-                paths: {{ border | safe }},
-                strokeColor: 'yellow',
-                strokeOpacity: 0.8,
-                strokeWeight: 2,
-                fillColor: 'yellow',
-                fillOpacity: 0.35,
-                editable: true
-            });
-            border_{{loop.index0}}.setMap({{gmap.varname}});
-        {% endfor %}
-        var bounds = new google.maps.LatLngBounds();
-        for(i=0;i<markers.length;i++) {
-            bounds.extend(markers[i].getPosition());
-        }
-        {{gmap.varname}}.fitBounds(bounds);
     }
-    function getInfoCallback(map, content) {
-        var infowindow = new google.maps.InfoWindow({content: content});
-        return function() {
-                infowindow.setContent(content);
-                infowindow.open(map, this);
-            };
-    }
+
     google.maps.event.addDomListener(window, 'load', initialize_{{gmap.varname}});
 </script>

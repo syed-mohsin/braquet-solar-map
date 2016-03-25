@@ -5,7 +5,7 @@ DEFAULT_ICON = '//maps.google.com/mapfiles/ms/icons/red-dot.png'
 
 class Map(object):
 	def __init__(self, identifier, lat, lng,
-				 zoom=1, maptype="SATELLITE", markers=None,
+				 zoom=19, maptype="SATELLITE", markers=None,
 				 varname='map',
 				 style="height:600px;width:1000px;margin:0;",
 				 roof_borders=None,

@@ -23,9 +23,9 @@ def mapview():
 	# create a map in view
 	mymap = Map(
 		identifier="view-side",
-		lat=37.4419,
-		lng=-122.1419,
-		markers=[(37.4419,-122.1419)],
+		lat=37.7918,
+		lng=-122.4266,
+		markers=[],
 		style="height:600px;width:1000px;margin:0;"
 	)
 	locations = None
