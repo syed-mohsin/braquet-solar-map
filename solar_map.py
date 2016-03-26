@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, Response, json, jsonify
+from flask_mail import Mail
+from flask_mail import Message
 from pymongo import MongoClient
 from googleplaces import GooglePlaces, types, lang
 from geopy.geocoders import Nominatim
@@ -8,9 +10,19 @@ import numpy as np
 from decimal import Decimal
 import json
 import urllib2
+import base64
 import os
 
+MAIL_SERVER = 'smtp.gmail.com'
+MAIL_PORT   = 465
+MAIL_USE_TLS = False
+MAIL_USE_SSL = True
+MAIL_USERNAME = credentials.MAIL_USER_NAME
+MAIL_PASSWORD = credentials.MAIL_PASSWORD
+
 app = Flask(__name__)
+app.config.from_object(__name__)
+mail = Mail(app)
 # mongo = credentials.connect()
 google_places = GooglePlaces(credentials.API_KEY)
 geolocator = Nominatim()
@@ -51,7 +63,7 @@ def mapview():
 
 	return render_template('home.html', mymap=mymap, locations=locations, logo=logo)
 
-@app.route("/nrel", methods =["POST"])
+@app.route("/nrel", methods=["POST"])
 def nrel():
 	if request.method == "POST":
 		lat = str(request.json['lat'])
@@ -59,7 +71,6 @@ def nrel():
 		tilt = str(request.json['tilt'])
 		azimuth = str(request.json['azimuth'])
 		capacity = str(request.json['capacity'])
-		print lat, lng, tilt, azimuth, capacity
 
 		try:
 			response = urllib2.urlopen("https://developer.nrel.gov/api/pvwatts/v5.json?api_key=" + credentials.NREL_API_KEY + \
@@ -68,16 +79,49 @@ def nrel():
 			return "ERROR: API call failed"
 
 		data = json.load(response)
-		print data["outputs"]["dc_monthly"][2] # march output
 		if data["outputs"]["dc_monthly"] != None:
 			return str(data["outputs"]["dc_monthly"][2])
 		else:
 			return "error retrieving energy production"
 
 	else:
-		return str("404 ERROR");
+		return "404 ERROR";
 
+@app.route("/sendEmailReport", methods=["POST"])
+def sendEmailReport():
+	if request.method == "POST":
+		# base64 encoded image
+		screenshot_base64 = str(request.json['screenshot'])[22:] # shave off the header "data:image/png;base64<comma_here>"
+		energy = str(request.json['energy'])
+		numPanels = str(request.json['numPanels'])
 
+		# get rooftop screenshot
+		
+		img_loc = "static/maps/rooftop_screenshot.png"
+
+		# decode base64 png screenshot
+		fp = open(img_loc, "wb")
+		fp.write(base64.b64decode(screenshot_base64))
+		fp.close()
+
+		msg = Message("Braquet | Solar Report",
+					  sender=("Braquet", credentials.MAIL_USER_NAME),
+					  recipients=["syedm.90@gmail.com","takayuki.koizumi@gmail.com"])
+
+		with open('static/email_template.html') as email:
+			data = email.read()
+
+		with app.open_resource(img_loc) as screenshot:
+			msg.attach(img_loc, "image/png", screenshot.read())
+
+		msg.html = data
+
+		mail.send(msg)
+
+		return "success"
+
+	else:
+		return "404 ERROR"
 
 
 if __name__ == "__main__":
