@@ -106,7 +106,7 @@ def sendEmailReport():
 
 		msg = Message("Braquet | Solar Report",
 					  sender=("Braquet", credentials.MAIL_USER_NAME),
-					  recipients=["syedm.90@gmail.com"])
+					  recipients=["syedm.90@gmail.com","takayuki.koizumi@gmail.com"])
 
 		msg.html = render_template('email.html', energy=energy, numPanels=numPanels)
 
