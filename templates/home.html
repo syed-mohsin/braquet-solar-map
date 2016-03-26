@@ -67,9 +67,41 @@
                 margin-right:5px;
             }
 
+            .modal-body .screen-shot {
+                width:350px;
+            }
+
+            /* make keyframes that tell the start state and the end state of our object */
+            @-webkit-keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+            @-moz-keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+            @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+            .fade-in {
+
+              opacity:0;  /* make things invisible upon start */
+              -webkit-animation:fadeIn ease-in 1;  /* call our keyframe named fadeIn, use animattion ease-in and repeat it only 1 time */
+              -moz-animation:fadeIn ease-in 1;
+              animation:fadeIn ease-in 1;
+
+              -webkit-animation-fill-mode:forwards;  /* this makes sure that after animation is done we remain at the last keyframe value (opacity: 1)*/
+              -moz-animation-fill-mode:forwards;
+              animation-fill-mode:forwards;
+
+              -webkit-animation-duration:0.3s;
+              -moz-animation-duration:0.3s;
+              animation-duration:0.3s;
+
+            }
+
             </style>
     </head>
     <body>
+
+     <!-- Trigger the modal with a button -->
+  
+
+  <!-- Modal -->
+
 
     <nav class="navbar navbar-inverse" style="background:black;">
       <div class="container-fluid">
@@ -94,6 +126,49 @@
                  
               </a>
             </li>
+            <li>
+                <a>
+                <!--button that is simulated on load to pop up modal-->
+                <div style="display:none;" id="toggle" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal"></div>
+                </a>
+                  <!--Modal Content-->
+                  <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog">
+                    
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <h4 class="modal-title">Welcome to Braquet!</h4>
+                        </div>
+                        <div class="modal-body" style="height:400px;"> 
+                        <div id="1">
+                          <p>In the map, look for the roof you want to do a system design on</p>
+                          <img class="screen-shot" src="/static/sample_roof.png">
+                        </div>
+                        <div id="2" style="display:none" class="fade-in">
+                          <p>Start designing your solar system by clicking the draw icon <img src="/static/icon_draw.png"> on the top right</p>
+                        </div>
+                        <div id="3" style="display:none" class="fade-in">
+                          <p>Then, you can define the layout area(s) by clicking on various parts of the roof</p>
+                          <img class="screen-shot" src="/static/sample_selected_roof.png">
+                        </div>
+                        <div id="4" style="display:none" class="fade-in">
+                          <p>That's it! You should now see a panel layout. You can change the system's orientation and panel specs under Project Settings.</p>
+                          <img class="screen-shot" src="/static/sample_panel_layout.png">
+                        </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button id="back" type="button" class="btn btn-default" style="display:none;">Back</button>
+                          <button id="next" type="button" class="btn btn-default">Next</button>
+                          <button id="end" type="button" class="btn btn-default" data-dismiss="modal">Ok, got it.</button>
+                        </div>
+                      </div>
+                      
+                    </div>
+                  </div>
+                  
+                </div>
+            </li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
           </ul>
@@ -117,7 +192,45 @@
         document.getElementById('view-side').style.width = '100%'
         document.getElementById('view-side').style.height = '100vh'
         document.getElementsByClassName('navbar')[0].style.marginBottom ='0px'
-"0px"
+
+        //simulates onload click to activate modal
+        eventFire(document.getElementById('toggle'), 'click');
+        //iniitalizes count variable for next/back button
+        var count = 1;
+        document.getElementById('next').onclick = next
+        document.getElementById('back').onclick = back
+        
+        
+        
+        //displays the next instruction 
+        function next(){
+            document.getElementById(count).style.display = 'none'
+            count += 1
+            document.getElementById('back').style.display = ''
+            document.getElementById(count).style.display = 'block'
+            if(count ==4){
+                document.getElementById('next').style.display = 'none'
+                document.getElementById('end').innerHTML = 'Get started!'
+            }
+        }
+        //displays the previous instruction 
+        function back(){
+            document.getElementById(count).style.display = 'none'
+            count -= 1
+            document.getElementById('next').style.display = ''
+            document.getElementById(count).style.display = 'block'
+            
+        }
+        //simulates click
+        function eventFire(el, etype){
+          if (el.fireEvent) {
+            el.fireEvent('on' + etype);
+          } else {
+            var evObj = document.createEvent('Events');
+            evObj.initEvent(etype, true, false);
+            el.dispatchEvent(evObj);
+          }
+        }
         </script>
 
         
