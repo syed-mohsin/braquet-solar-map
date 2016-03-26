@@ -58,56 +58,6 @@
         // listener for email report button click
         document.getElementById('sendemail').onmousedown = function(){
             var selected_polygon = getSelectedPolygon();
-<<<<<<< HEAD
-            var dataUrl;
-            console.log("made it into listener")
-
-             // http://stackoverflow.com/questions/24046778/html2canvas-does-not-work-with-google-maps-pan
-            // stack overflow solution to take a screenshot of googlemaps
-            var transform=$(".gm-style>div:first>div").css("transform")
-            var comp=transform.split(",") // split up the transform matrix
-            var mapleft=parseFloat(comp[4]) // get left value
-            var maptop=parseFloat(comp[5]) // get top value
-            $(".gm-style>div:first>div").css({ //get the map container. not sure if stable
-                "transform": "none",
-                "left": mapleft,
-                "top": maptop,
-            })
-            console.log("made it past transform")
-            html2canvas(document.getElementById('{{gmap.identifier}}'),
-            {
-                useCORS: true,
-                onrendered: function(canvas)
-                {   
-                    console.log("made it into onrendered")
-                    dataUrl = canvas.toDataURL('image/png')
-                    $(".gm-style>div:first>div").css({
-                        left:0,
-                        top:0,
-                        "transform": transform
-                    })
-
-                    $.ajax({
-                        type : "POST",
-                        url  : "/sendEmailReport",
-                        data : JSON.stringify({"screenshot" : dataUrl,
-                                               "energy"     : selected_polygon.energyProduction,
-                                               "numPanels"  : selected_polygon.numPanels}, 
-                                               null, '\t'),
-                        contentType: 'application/json; charset=UTF-8',
-                        success: function (result) {
-                            if (result === "success")
-                                console.log("success");
-                            else
-                                console.log("fail");
-                        }
-                    })
-                }
-            })
-        }
-    }
-
-=======
 
             // zoom into polygon
             // setZoomOnPolygon(selected_polygon);
@@ -166,7 +116,6 @@
         })
     }
 
->>>>>>> 7dbe01b401e2ccbd3a9e6e9c472117b6a7bf8d08
     function updateSystemListener() {
         // listener for update button click
         document.getElementById('update').onmousedown = function(){
