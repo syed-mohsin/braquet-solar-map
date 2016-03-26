@@ -237,7 +237,27 @@
         //tilt multiplier to adjust how the panel would look tilted
         var tilt_coeff = Math.cos(tilt*Math.PI/180);
         //solar spec before tilt is considered
-        var pre_solar_spec = {width: 0.0000114, length: 0.00000814};
+
+        function mToCoordinates(solarWidth){
+            center = getPolygonCenter(coordinates);
+            var zoom = {{gmap.varname}}.getZoom();
+
+            var scale = 1<<zoom;
+
+            var metersPerPixel = 156543.03392 * Math.cos(latlngCenter.lat() * Math.PI / 180) / Math.pow(2, zoom)
+            
+            console.log('Meters per pixel: ' + metersPerPixel + ' Zoom: ' + zoom + 'Scale: ' + scale)
+            var mToPixel = solarWidth*(1/metersPerPixel)
+
+            var pixelToWorld = mToPixel/scale
+            return pixelToWorld
+        }
+
+        var m_solar_spec = {width: 1.2, length: 1.6};
+
+        var pre_solar_spec = {width: mToCoordinates(m_solar_spec.width), length: mToCoordinates(m_solar_spec.length)}
+
+            console.log(pre_solar_spec)
 
         if(orientation == 'portrait'){
             azimuth += 180; //not 0 bc it takes into account for the off-set so there are no negative values
@@ -369,6 +389,7 @@
                 }
                 ];
 
+                //converts point coordinate to lat/lng
                 for(n=0; n<pv_corner_arrayXY.length; n++){
                     pv_corner_arrayXY[n] = pointToLatLng(pv_corner_arrayXY[n])
                 }
