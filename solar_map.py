@@ -108,13 +108,7 @@ def sendEmailReport():
 					  sender=("Braquet", credentials.MAIL_USER_NAME),
 					  recipients=["syedm.90@gmail.com","takayuki.koizumi@gmail.com"])
 
-		with open('static/email_template.html') as email:
-			data = email.read()
-
-		with app.open_resource(img_loc) as screenshot:
-			msg.attach(img_loc, "image/png", screenshot.read())
-
-		msg.html = data
+		msg.html = render_template('email.html', energy=energy, numPanels=numPanels)
 
 		mail.send(msg)
 
