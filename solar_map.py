@@ -110,6 +110,9 @@ def sendEmailReport():
 
 		msg.html = render_template('email.html', energy=energy, numPanels=numPanels)
 
+		with app.open_resource(img_loc) as screenshot:
+			msg.attach(img_loc, "image/png", screenshot.read())
+
 		mail.send(msg)
 
 		return "success"
