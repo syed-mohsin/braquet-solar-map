@@ -58,52 +58,62 @@
         // listener for email report button click
         document.getElementById('sendemail').onmousedown = function(){
             var selected_polygon = getSelectedPolygon();
-            var dataUrl;
-            console.log("made it into listener")
 
-             // http://stackoverflow.com/questions/24046778/html2canvas-does-not-work-with-google-maps-pan
-            // stack overflow solution to take a screenshot of googlemaps
-            var transform=$(".gm-style>div:first>div").css("transform")
-            var comp=transform.split(",") // split up the transform matrix
-            var mapleft=parseFloat(comp[4]) // get left value
-            var maptop=parseFloat(comp[5]) // get top value
-            $(".gm-style>div:first>div").css({ //get the map container. not sure if stable
-                "transform": "none",
-                "left": mapleft,
-                "top": maptop,
-            })
-            console.log("made it past transform")
-            html2canvas(document.getElementById('{{gmap.identifier}}'),
-            {
-                useCORS: true,
-                onrendered: function(canvas)
-                {   
-                    console.log("made it into onrendered")
-                    dataUrl = canvas.toDataURL('image/png')
-                    $(".gm-style>div:first>div").css({
-                        left:0,
-                        top:0,
-                        "transform": transform
-                    })
+            // zoom into polygon
+            // setZoomOnPolygon(selected_polygon);
+            {{gmap.varname}}.setCenter(selected_polygon.latlngCenter);
+            {{gmap.varname}}.setZoom(20);
 
-                    $.ajax({
-                        type : "POST",
-                        url  : "/sendEmailReport",
-                        data : JSON.stringify({"screenshot" : dataUrl,
-                                               "energy"     : selected_polygon.energyProduction,
-                                               "numPanels"  : selected_polygon.numPanels}, 
-                                               null, '\t'),
-                        contentType: 'application/json; charset=UTF-8',
-                        success: function (result) {
-                            if (result === "success")
-                                console.log("success");
-                            else
-                                console.log("fail");
-                        }
-                    })
-                }
-            })
+            listener = google.maps.event.addListenerOnce({{gmap.varname}}, 'tilesloaded', function(event) {
+                setTimeout(sendEmail(selected_polygon), 5000);
+            });
+
+            setTimeout(function() { google.maps.event.removeListener(listener)}, 2000);
         }
+    }
+
+    function sendEmail(selected_polygon) {
+        // http://stackoverflow.com/questions/24046778/html2canvas-does-not-work-with-google-maps-pan
+        // stack overflow solution to take a screenshot of googlemaps
+        var transform=$(".gm-style>div:first>div").css("transform")
+        var comp=transform.split(",") // split up the transform matrix
+        var mapleft=parseFloat(comp[4]) // get left value
+        var maptop=parseFloat(comp[5]) // get top value
+        $(".gm-style>div:first>div").css({ //get the map container. not sure if stable
+            "transform": "none",
+            "left": mapleft,
+            "top": maptop,
+        })
+        html2canvas(document.getElementById('{{gmap.identifier}}'),
+        {
+            useCORS: true,
+            onrendered: function(canvas)
+            {   
+                console.log("made it into onrendered")
+                dataUrl = canvas.toDataURL('image/png')
+                $(".gm-style>div:first>div").css({
+                    left:0,
+                    top:0,
+                    "transform": transform
+                })
+
+                $.ajax({
+                    type : "POST",
+                    url  : "/sendEmailReport",
+                    data : JSON.stringify({"screenshot" : dataUrl,
+                                           "energy"     : selected_polygon.energyProduction,
+                                           "numPanels"  : selected_polygon.numPanels}, 
+                                           null, '\t'),
+                    contentType: 'application/json; charset=UTF-8',
+                    success: function (result) {
+                        if (result === "success")
+                            console.log("success");
+                        else
+                            console.log("fail");
+                    }
+                })
+            }
+        })
     }
 
     function updateSystemListener() {
@@ -471,9 +481,18 @@
                }
     }
 
+    function setZoomOnPolygon(polygon_object) {
+        var bound = new google.maps.LatLngBounds();
+        for(var i=0; i<polygon_object.coordinates.length; i++) 
+            bound.extend( new google.maps.LatLng(polygon_object.coordinates[i].lat(), 
+                polygon_object.coordinates[i].lng()));
+
+        {{gmap.varname}}.fitBounds(bound);
+    }
+
     function getPolygonCenter(coordinates) {
         var bound = new google.maps.LatLngBounds();
-        for (var i=0;i<coordinates.length; i++) {
+        for(var i=0;i<coordinates.length; i++) {
             bound.extend( new google.maps.LatLng(coordinates[i].lat(), coordinates[i].lng()));
         }
         return bound.getCenter();
