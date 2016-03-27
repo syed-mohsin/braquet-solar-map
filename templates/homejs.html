@@ -1,11 +1,54 @@
-<script src="https://maps.googleapis.com/maps/api/js?libraries=drawing,places" type="text/javascript"></script>
-<script src="static/js/html2canvas.js" type="text/javascript"></script>
-
 <style type="text/css">
       #{{gmap.identifier}} { {{gmap.style}} }
 </style>
 
 <script type="text/javascript">
+    function getDate() {
+        var months = ["January", "February", "March", "April", "May", "June",
+                      "July", "August", "September", "October", "November", "December"];
+        var d = new Date();
+        var month = months[d.getMonth()];
+        var year = d.getFullYear();
+        var day = d.getUTCDate();
+
+        return month + " " + day + ", " + year;
+    }
+
+    function drawChart() {
+        var selected_polygon = getSelectedPolygon();
+        var energyProduction = selected_polygon.energyProduction;
+
+        var data = new google.visualization.arrayToDataTable([
+            ['Month', 'Energy Production (kWh)'],
+            ['January', energyProduction[0]],
+            ['February', energyProduction[1]],
+            ['March', energyProduction[2]],
+            ['April', energyProduction[3]],
+            ['May', energyProduction[4]],
+            ['June', energyProduction[5]]
+        ]);
+
+        var options = {
+            title: "Solar Power Output on " + getDate(),
+            legend: 'none'
+        }
+
+        var chart_canvas = document.createElement('canvas');
+        chart_canvas.width = 500;
+        chart_canvas.height = 400;
+
+        var ctx = chart_canvas.getContext('2d');
+
+        var chart = new google.visualization.ColumnChart(chart_canvas);
+
+        google.visualization.events.addListener(chart, 'ready', function() {
+            chart_base64 = chart.getImageURI();
+            canvas = null; // delete DOM
+        })
+
+        chart.draw(data, options);
+    }
+
     function getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, callback) {
         $.ajax({
             type : "POST",
@@ -18,6 +61,7 @@
                                    null, '\t'),
             contentType: 'application/json; charset=UTF-8',
             success: function (result) {
+                console.log(result)
                 callback(result);
             }
         })
@@ -73,6 +117,8 @@
     }
 
     function sendEmail(selected_polygon) {
+        google.charts.setOnLoadCallback(drawChart);
+
         // http://stackoverflow.com/questions/24046778/html2canvas-does-not-work-with-google-maps-pan
         // stack overflow solution to take a screenshot of googlemaps
         var transform=$(".gm-style>div:first>div").css("transform")
@@ -101,6 +147,7 @@
                     type : "POST",
                     url  : "/sendEmailReport",
                     data : JSON.stringify({"screenshot" : dataUrl,
+                                           "chart"      : chart_base64,
                                            "energy"     : selected_polygon.energyProduction,
                                            "numPanels"  : selected_polygon.numPanels}, 
                                            null, '\t'),
@@ -156,7 +203,7 @@
                 var project_stats = document.getElementById("projectStats")
                 project_stats.innerHTML = "Nameplate Capacity: " + selected_polygon.systemCapacity + "kW<br>";
                 project_stats.innerHTML += "# of panels: " + selected_polygon.numPanels + "<br>";
-                project_stats.innerHTML += "Energy Production: " + selected_polygon.energyProduction + "kWh (monthly)";
+                project_stats.innerHTML += "Energy Production: " + selected_polygon.energyProduction[2] + "kWh (monthly)";
             });   
         };
     }
@@ -540,6 +587,7 @@
     //***GLOBAL VARIABLES******
     var polygons = [];
     var {{gmap.varname}};
+    var chart_base64;
 
     function initialize_{{gmap.varname}}() {
         var markers = [];
@@ -628,7 +676,7 @@
                 var project_stats = document.getElementById("projectStats")
                 project_stats.innerHTML = "Nameplate Capacity: " + p.systemCapacity + "kW<br>";
                 project_stats.innerHTML += "# of panels: " + p.numPanels + "<br>";
-                project_stats.innerHTML += "Energy Production: " + p.energyProduction + "kWh (monthly)";
+                project_stats.innerHTML += "Energy Production: " + p.energyProduction[2] + "kWh (monthly)";
 
                 // listener for click on polygon
                 google.maps.event.addListener(p.polygon, 'click', function () {

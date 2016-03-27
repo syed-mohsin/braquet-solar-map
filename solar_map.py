@@ -80,7 +80,7 @@ def nrel():
 
 		data = json.load(response)
 		if data["outputs"]["dc_monthly"] != None:
-			return str(data["outputs"]["dc_monthly"][2])
+			return jsonify(dict([(i, data["outputs"]["dc_monthly"][i]) for i in range(len(data))]))
 		else:
 			return "error retrieving energy production"
 
@@ -92,17 +92,21 @@ def sendEmailReport():
 	if request.method == "POST":
 		# base64 encoded image
 		screenshot_base64 = str(request.json['screenshot'])[22:] # shave off the header "data:image/png;base64<comma_here>"
-		energy = str(request.json['energy'])
+		chart_base64 = str(request.json['chart'])[22:]
+		energy = request.json['energy']['2']
 		numPanels = str(request.json['numPanels'])
 
-		# get rooftop screenshot
-		
+		# screenshot image location
 		img_loc = "static/maps/rooftop_screenshot.png"
+		chart_loc = "static/maps/production_chart.png"
 
 		# decode base64 png screenshot
-		fp = open(img_loc, "wb")
-		fp.write(base64.b64decode(screenshot_base64))
-		fp.close()
+		fp1 = open(img_loc, "wb")
+		fp2 = open(chart_loc, "wb")
+		fp1.write(base64.b64decode(screenshot_base64))
+		fp2.write(base64.b64decode(chart_base64))
+		fp1.close()
+		fp2.close()
 
 		msg = Message("Braquet | Solar Report",
 					  sender=("Braquet", credentials.MAIL_USER_NAME),
@@ -112,6 +116,9 @@ def sendEmailReport():
 
 		with app.open_resource(img_loc) as screenshot:
 			msg.attach(img_loc, "image/png", screenshot.read())
+
+		with app.open_resource(chart_loc) as chart:
+			msg.attach(chart_loc, "image/png", chart.read())
 
 		mail.send(msg)
 
