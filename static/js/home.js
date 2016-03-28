@@ -91,8 +91,16 @@ function Show(id){
 
 
 //makes the map full-screen
-        document.getElementById('view-side').style.width = '100%'
-        document.getElementById('view-side').style.height = '100vh'
+var view_side = document.getElementById('view-side')
+        view_side.style.width = '100%'
+        view_side.style.height = '100vh'
+        view_side.style.position = 'absolute'
+        view_side.style.height = 'auto'
+        view_side.style.bottom = '0'
+        view_side.style.top = '0'
+        view_side.style.left = '0'
+        view_side.style.right = '0'
+        view_side.style.marginTop = '50px'
         document.getElementsByClassName('navbar')[0].style.marginBottom ='0px'
 
         //simulates onload click to activate modal
