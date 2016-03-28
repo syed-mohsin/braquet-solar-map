@@ -16,14 +16,57 @@
         google.charts.load('current', {packages: ['corechart', 'table']});
       </script>
 
+            <style>
+            </style>
+
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 
       {{mymap.js}}           
  
     </head>
     <body>
-  
+
   <!-- Modal -->
+<div id="app">
+    
+    <div style="display:none;" class="btn btn-primary" id="button-modal">Click!</div>
+    
+    <div id="modal-id" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+         <div class="modal-dialog">
+                    
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Welcome to Braquet!</h4>
+      </div>
+      <div class="modal-body" style="height:400px;"> 
+          <div id="1">
+            <p>In the map, look for the roof you want to do a system design on</p>
+            <img class="screen-shot" src="/static/images/sample_roof.png">
+          </div>
+          <div id="2" style="display:none" class="fade-in">
+            <p>Start designing your solar system by clicking the draw icon <img src="/static/images/icon_draw.png"> on the top right</p>
+          </div>
+          <div id="3" style="display:none" class="fade-in">
+            <p>Then, you can define the layout area(s) by clicking on various parts of the roof</p>
+            <img class="screen-shot" src="/static/images/sample_selected_roof.png">
+          </div>
+          <div id="4" style="display:none" class="fade-in">
+            <p>That's it! You should now see a panel layout. You can change the system's orientation and panel specs under Project Settings.</p>
+            <img class="screen-shot" src="/static/images/sample_panel_layout.png">
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button id="back" type="button" class="btn btn-default" style="display:none;">Back</button>
+        <button id="next" type="button" class="btn btn-default">Next</button>
+        <button id="end" type="button" class="btn btn-default" data-dismiss="modal">Ok, got it.</button>
+      </div>
+    </div>
+    
+        </div>
+    </div>
+</div>
+  
     <nav class="navbar navbar-inverse" style="background:black;">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -48,50 +91,11 @@
               </a>
             </li>
             <li>
-                <a>
-                <!--button that is simulated on load to pop up modal-->
-                <div style="display:none;" id="toggle" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal"></div>
-                </a>
-                  <!--Modal Content-->
-                  <div class="modal fade" id="myModal" role="dialog">
-                    <div class="modal-dialog">
-                    
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <button type="button" class="close" data-dismiss="modal">&times;</button>
-                          <h4 class="modal-title">Welcome to Braquet!</h4>
-                        </div>
-                        <div class="modal-body" style="height:400px;"> 
-                        <div id="1">
-                          <p>In the map, look for the roof you want to do a system design on</p>
-                          <img class="screen-shot" src="/static/images/sample_roof.png">
-                        </div>
-                        <div id="2" style="display:none" class="fade-in">
-                          <p>Start designing your solar system by clicking the draw icon <img src="/static/images/icon_draw.png"> on the top right</p>
-                        </div>
-                        <div id="3" style="display:none" class="fade-in">
-                          <p>Then, you can define the layout area(s) by clicking on various parts of the roof</p>
-                          <img class="screen-shot" src="/static/images/sample_selected_roof.png">
-                        </div>
-                        <div id="4" style="display:none" class="fade-in">
-                          <p>That's it! You should now see a panel layout. You can change the system's orientation and panel specs under Project Settings.</p>
-                          <img class="screen-shot" src="/static/images/sample_panel_layout.png">
-                        </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button id="back" type="button" class="btn btn-default" style="display:none;">Back</button>
-                          <button id="next" type="button" class="btn btn-default">Next</button>
-                          <button id="end" type="button" class="btn btn-default" data-dismiss="modal">Ok, got it.</button>
-                        </div>
-                      </div>
-                      
-                    </div>
-                  </div>
+
+        </div>
                   
                 </div>
             </li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
           </ul>
         </div>
       </div>
