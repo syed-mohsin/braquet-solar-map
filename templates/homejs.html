@@ -90,8 +90,8 @@
         controlText.style.paddingLeft = '5px';
         controlText.style.paddingRight = '5px';
         controlText.innerHTML = '<div id="projectStats"></div>';   
-        controlText.innerHTML += '<input style="margin-top:15px;" class="form-control" id ="azimuth" type="text" placeholder="Azimuth (deg)">';            
-        controlText.innerHTML += '<input class="form-control" id ="tilt" type="text" placeholder="Tilt (deg)">';
+        controlText.innerHTML += '<input style="margin-top:15px;" class="form-control" id ="azimuth" type="text" placeholder="Azimuth (0-360 deg)">';            
+        controlText.innerHTML += '<input class="form-control" id ="tilt" type="text" placeholder="Tilt (0-90 deg)">';
         controlText.innerHTML += '<input class="form-control" id ="rowSpace" type="text" placeholder="Row space (in.)">';
         controlText.innerHTML += '<select class="form-control" id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select>';
         controlText.innerHTML += '<div class="action"><div id="submit"><button class="btn btn-default" id="update">Update</button></div><div id="email"><button class="btn btn-default" id="sendemail">Email Report</button></div></div>';
@@ -361,7 +361,7 @@
             return pixelToWorld
         }
 
-        var m_solar_spec = {width: 1.2, length: 1.6};
+        var m_solar_spec = {width: 1.3, length: 1.6};
 
         var pre_solar_spec = {width: mToCoordinates(m_solar_spec.width), length: mToCoordinates(m_solar_spec.length)}
 
@@ -381,7 +381,7 @@
 
         var tilt_coeff = Math.cos(tilt*Math.PI/180);
 
-        var solar_spec = {width: Math.pow(tilt_coeff, lat) * pre_solar_spec.width, length:  Math.pow(tilt_coeff, port) * pre_solar_spec.length};
+        var solar_spec = {width: Math.pow(tilt_coeff, port) * pre_solar_spec.width, length:  Math.pow(tilt_coeff, lat) * pre_solar_spec.length};
 
         var row_space = Math.pow(rowSpace, lat); // space between row of panels
         var col_space = Math.pow(rowSpace, port); // space between column of panels
