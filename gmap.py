@@ -1,4 +1,5 @@
 from flask import render_template, Blueprint, Markup
+from panel_specs import panel_specs
 
 ## code modified from open source flask module 'Flask-GoogleMaps'
 DEFAULT_ICON = '//maps.google.com/mapfiles/ms/icons/red-dot.png'
@@ -39,6 +40,7 @@ class Map(object):
 
 	@property
 	def js(self):
-		return Markup(self.render('homejs.html', gmap=self))
+		panel_data = panel_specs()
+		return Markup(self.render('homejs.html', gmap=self, panel_data = panel_data))
 
 

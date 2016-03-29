@@ -31,7 +31,7 @@ geolocator = Nominatim()
 def mapview():
 
 	logo = "Braquet | Layout"
-
+	
 	# create a map in view
 	mymap = Map(
 		identifier="view-side",

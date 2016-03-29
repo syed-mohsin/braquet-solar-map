@@ -111,9 +111,20 @@
                 <div><p>Address: {{loc.1}}</p></div>
             {% endfor %}
         {% endif %}
-
+       
        <script src="/static/js/home.js"></script>
 
         
     </body>
+    <script>
+       var selectPanel = document.getElementById('panel_specs');
+       {% for item in panel_data %}
+        {% for i in panel_data[item] %}
+        var optionPanel = document.createElement('option')
+        optionPanel.innerHTML = "{{i['model_name']}}"
+        selectPanel.appendChild(optionPanel)
+        {% endfor %}
+        {% endfor %}
+
+    </script>
 </html>
