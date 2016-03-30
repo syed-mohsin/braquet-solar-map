@@ -90,6 +90,10 @@
         {% for i in panel_data[item] %}
         var optionPanel = document.createElement('option')
         optionPanel.innerHTML = "{{i['model_name']}}"
+        optionPanel.value = "{{i['id']}}"
+        optionPanel.setAttribute('data-wattage', "{{i['wattage']}}")
+        optionPanel.setAttribute('data-length', "{{i['length']}}")
+        optionPanel.setAttribute('data-width', "{{i['width']}}")
         selectPanel.appendChild(optionPanel)
         {% endfor %}
         {% endfor %}
@@ -194,6 +198,12 @@
                 selected_polygon.rowSpaceValue = document.getElementById('rowSpace').value;
             if (document.getElementById('orientation').value != "")
                 selected_polygon.orientationValue = document.getElementById('orientation').value;
+            if (document.getElementById('panel_specs').value != "")
+                var panelId = document.getElementById('panel_specs').value
+                selected_polygon.moduleWattage = document.getElementById('panel_specs')[panelId].getAttribute('data-wattage')
+                selected_polygon.panelLength = document.getElementById('panel_specs')[panelId].getAttribute('data-length')
+                selected_polygon.panelWidth = document.getElementById('panel_specs')[panelId].getAttribute('data-width')
+            
             console.log(selected_polygon.azimuthValue);
             console.log(selected_polygon.tiltValue);
             console.log(selected_polygon.rowSpaceValue);
@@ -206,7 +216,9 @@
                                  selected_polygon.orientationValue, 
                                  selected_polygon.rowSpaceValue, 
                                  selected_polygon.tiltValue, 
-                                 selected_polygon.moduleWattage);
+                                 selected_polygon.moduleWattage, 
+                                 selected_polygon.panelLength, 
+                                 selected_polygon.panelWidth);
             selected_polygon.systemCapacity = output["s"];
             selected_polygon.pArray = output["arr"];
             selected_polygon.latlngCenter = getPolygonCenter(selected_polygon.coordinates);
@@ -345,7 +357,7 @@
     }
 
 
-    function panelLayout(polygon, coordinates, azimuth, orientation, rowSpace, tilt, moduleWattage) {
+    function panelLayout(polygon, coordinates, azimuth, orientation, rowSpace, tilt, moduleWattage, panelLength, panelWdith) {
         //azimuth - angle of panel from true North
         //tilt - angle of panel from ground - not working properly for portrait..might be the difference between latitude/longitude conversion from meters
         //rowSpace - space between rows 
@@ -376,7 +388,7 @@
             return pixelToWorld
         }
 
-        var m_solar_spec = {width: 1.3, length: 1.6};
+        var m_solar_spec = {width: panelWdith, length: panelLength};
 
         var pre_solar_spec = {width: mToCoordinates(m_solar_spec.width), length: mToCoordinates(m_solar_spec.length)}
 
@@ -593,6 +605,8 @@
         this.rowSpaceValue = 1.6;
         this.tiltValue = 30;
         this.moduleWattage = 235;
+        this.panelLength = 1.6;
+        this.panelWidth = 1.2;
         this.systemCapacity = "loading...";
         this.latlngCenter = getPolygonCenter(this.coordinates); // updated in panelLayout()
         this.energyProduction = "loading...";
@@ -689,7 +703,7 @@
 
             // ***generate default panel layout independent of other listeners
             // requires lat() as lat/lng here are functions not keys in a dictionary
-            output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+            output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage, p.panelLength, p.panelWidth);
             p.systemCapacity = output["s"];
             p.pArray = output["arr"];
             p.numPanels = output["numPanels"];
@@ -716,7 +730,7 @@
                 selectPolygon(p);
                 p.coordinates = p.polygon.getPath().getArray();
                 p.pArray.setMap(null); 
-                output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+                output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage, p.panelLength, p.panelWidth);
                 p.systemCapacity = output["s"];
                 p.pArray = output["arr"];
                 p.numPanels = output["numPanels"];
@@ -733,7 +747,7 @@
                 selectPolygon(p);
                 p.coordinates = p.polygon.getPath().getArray();
                 p.pArray.setMap(null); 
-                output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+                output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage, p.panelLength, p.panelWidth);
                 p.systemCapacity = output["s"];
                 p.pArray = output["arr"];
                 p.numPanels = output["numPanels"];
@@ -750,7 +764,7 @@
                 selectPolygon(p);
                 p.coordinates = p.polygon.getPath().getArray();
                 p.pArray.setMap(null); 
-                output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage);
+                output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage, p.panelLength, p.panelWidth);
                 p.systemCapacity = output["s"];
                 p.pArray = output["arr"];
                 p.numPanels = output["numPanels"];
