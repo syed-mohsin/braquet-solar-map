@@ -1,8 +1,17 @@
 from flask import render_template, Blueprint, Markup
-from panel_specs import panel_specs
 
 ## code modified from open source flask module 'Flask-GoogleMaps'
 DEFAULT_ICON = '//maps.google.com/mapfiles/ms/icons/red-dot.png'
+
+def panel_specs():
+    data = {'panels':[
+    {'id':0, 'model_name': 'Canadian Solar 270/60 (CS6K)', 'wattage': 270, 'length': 0.992, 'width': 1.65}, 
+    {'id':1, 'model_name': 'Canadian Solar 320/72 (CS6X)', 'wattage': 320, 'length': 0.996, 'width': 1.972},
+    {'id':2, 'model_name': 'Ying Li 250/60 (YL250P-29b)', 'wattage': 250, 'length': 0.990, 'width': 1.640},
+    {'id':3, 'model_name': 'Ying Li 300/72 (YL300P-35b)', 'wattage': 300, 'length': 0.990, 'width': 1.960},
+    {'id':4, 'model_name': 'Lightway 315/72 (LW6P72b)', 'wattage': 315, 'length': 0.990, 'width': 1.960},
+    ]}
+    return data
 
 class Map(object):
 	def __init__(self, identifier, lat, lng,
@@ -31,6 +40,8 @@ class Map(object):
 				self.typeflag = True
 		else:
 			self.infobox = None
+
+		self.panel_data = panel_specs()
 
 	def add_marker(self, lat, lng):
 		self.markers.append((lat, lng))

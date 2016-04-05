@@ -12,17 +12,15 @@
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
       <script src="https://maps.googleapis.com/maps/api/js?libraries=drawing,places" type="text/javascript"></script>
       <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+      <script type="text/javascript" src="static/js/init.js"></script>
       <script type="text/javascript">
         google.charts.load('current', {packages: ['corechart', 'table']});
+        MYLIBRARY.init({"map_id"      : "{{mymap.identifier}}",
+                        "map_name"    : "{{mymap.varname}}",
+                        "panel_data"  : {{mymap.panel_data|tojson}}
+                      });
       </script>
-      <style>
-
-     </style>
-
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-
-      {{mymap.js}}           
- 
+      <script src="/static/js/home.js"></script>
     </head>
     <body>
 
@@ -110,11 +108,7 @@
                <!--  <div><p>Phone Number: {{loc.1}}</p></div> -->
                 <div><p>Address: {{loc.1}}</p></div>
             {% endfor %}
-        {% endif %}
-       
-       <script src="/static/js/home.js"></script>
-
-        
+        {% endif %}        
     </body>
     <script>
        var selectPanel = document.getElementById('panel_specs');
@@ -124,7 +118,7 @@
         optionPanel.innerHTML = "{{i['model_name']}}"
         selectPanel.appendChild(optionPanel)
         {% endfor %}
-        {% endfor %}
+       {% endfor %}
 
     </script>
 </html>
