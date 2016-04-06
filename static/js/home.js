@@ -587,7 +587,7 @@ function initialize() {
     map = new google.maps.Map(
     document.getElementById(MYLIBRARY.getMapId()), {
         center: new google.maps.LatLng(37.7918, -122.4266),
-        zoom: 16,
+        zoom: 20,
         mapTypeId: google.maps.MapTypeId.SATELLITE
     });
 
@@ -617,7 +617,7 @@ function initialize() {
             map.fitBounds(place.geometry.viewport);
         } else {
             map.setCenter(place.geometry.location);
-            map.setZoom(17);
+            map.setZoom(19);
         }
     })
     // position center control manager
