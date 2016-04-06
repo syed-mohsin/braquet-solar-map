@@ -27,7 +27,12 @@ mail = Mail(app)
 google_places = GooglePlaces(credentials.API_KEY)
 geolocator = Nominatim()
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET"])
+@app.route("/index", methods=["GET"])
+def welcome():
+	return render_template('welcome.html')
+
+@app.route("/map", methods=["GET", "POST"])
 def mapview():
 
 	logo = "Braquet | Layout"
