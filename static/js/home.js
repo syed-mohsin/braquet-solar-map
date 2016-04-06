@@ -62,7 +62,13 @@ function getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapaci
 }
 
 function CenterControl(controlDiv, map) {
-     // Set CSS for the control border.
+    // Set CSS for the control border.
+
+    // FOR DEMO
+    if (MYLIBRARY.getIsDemo()) {
+        // add demo code
+    }
+
     var controlUI = document.createElement('div');
     controlUI.id = 'control';
     controlUI.style.backgroundColor = '#fff';
@@ -71,7 +77,7 @@ function CenterControl(controlDiv, map) {
     controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
     controlUI.style.padding = '10px';
     controlUI.style.textAlign = 'left';
-    controlUI.innerHTML = '<a data-toggle="collapse" href="#collapse1"><h5>Project Settings<span class="caret" style="margin-left:5px;"></span></h5></a>'
+    controlUI.innerHTML = '<a data-toggle="collapse" href="#collapse1"><h5>Project Settings<span class="caret" style="margin-left:5px;"></span></h5></a>';
     controlDiv.appendChild(controlUI);
 
     var selectPanel = document.createElement('select');

@@ -27,13 +27,14 @@ mail = Mail(app)
 google_places = GooglePlaces(credentials.API_KEY)
 geolocator = Nominatim()
 
-@app.route("/", methods=["GET"])
-@app.route("/index", methods=["GET"])
-def welcome():
-	return render_template('welcome.html')
-
-@app.route("/map", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
+@app.route("/index", methods=["GET", "POST"])
+@app.route("/demo", methods=["GET", "POST"])
 def mapview():
+	rule = request.url_rule
+	is_demo = False
+	if 'demo' in rule.rule:
+		is_demo = True
 
 	logo = "Braquet | Layout"
 	
@@ -66,7 +67,7 @@ def mapview():
 			zoom=20
 		)
 
-	return render_template('home.html', mymap=mymap, locations=locations, logo=logo)
+	return render_template('home.html', mymap=mymap, locations=locations, logo=logo, is_demo=is_demo)
 
 @app.route("/nrel", methods=["POST"])
 def nrel():
