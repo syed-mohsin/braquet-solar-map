@@ -98,27 +98,6 @@
         </div>
       </div>
     </nav>
-
-        <div id="{{mymap.identifier}}" class="{{mymap.cls}}"></div>
-
-        {% if locations %}
-            <h4>Nearby Businesses</h4>
-            {% for loc in locations %}
-                <div><p>{{ loc.0 }}</p></div>
-               <!--  <div><p>Phone Number: {{loc.1}}</p></div> -->
-                <div><p>Address: {{loc.1}}</p></div>
-            {% endfor %}
-        {% endif %}        
+        <div id="{{mymap.identifier}}" class="{{mymap.cls}}"></div>       
     </body>
-    <script>
-       var selectPanel = document.getElementById('panel_specs');
-       {% for item in panel_data %}
-        {% for i in panel_data[item] %}
-        var optionPanel = document.createElement('option')
-        optionPanel.innerHTML = "{{i['model_name']}}"
-        selectPanel.appendChild(optionPanel)
-        {% endfor %}
-       {% endfor %}
-
-    </script>
 </html>
