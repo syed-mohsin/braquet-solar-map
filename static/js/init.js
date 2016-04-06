@@ -15,7 +15,7 @@ var MYLIBRARY = MYLIBRARY || (function() {
 		getPanelSpecs : function() {
 			return _args["panel_data"];
 		},
-		getisDemo     : function() {
+		getIsDemo     : function() {
 			return _args["is_demo"];
 		}
 	};
