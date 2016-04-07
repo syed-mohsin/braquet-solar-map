@@ -164,36 +164,36 @@ function CenterControl(controlDiv, map) {
                             }
 }
 
-function quote(){
+function quote() {
 
-document.getElementById('bidDisplay').style.display = 'inherit';
+    document.getElementById('bidDisplay').style.display = 'inherit';
 
-id = ['bid1', 'bid2', 'bid3', 'bid4', 'bid5', 'bid6', 'bid7']
+    id = ['bid1', 'bid2', 'bid3', 'bid4', 'bid5', 'bid6', 'bid7']
 
-document.getElementById(id[5]).style.display = 'none'
-document.getElementById(id[1]).className = 'appear'
+    document.getElementById(id[5]).style.display = 'none'
+    document.getElementById(id[1]).className = 'appear'
 
-var demo = setInterval(bid,2000);
+    var demo = setInterval(bid, 2000);
 
-count =0
+    count = 0
 
-function bid(){
+    function bid() {
 
-    count += 1;
-    console.log(id[count])
-    document.getElementById(id[count-1]).style.display = 'none';
-    document.getElementById(id[count]).className = '';
-    document.getElementById(id[count]).style.display = 'inherit'
-    if(count==5){
-        document.getElementById(id[count]).className = 'green';
-        document.getElementById(id[count+1]).style.display = 'inherit';
-        clearInterval(demo);
-    }else{
-    
-    document.getElementById(id[count]).className = 'appear';
-}
-    
-}
+        count += 1;
+        console.log(id[count])
+        document.getElementById(id[count - 1]).style.display = 'none';
+        document.getElementById(id[count]).className = '';
+        document.getElementById(id[count]).style.display = 'inherit'
+        if (count == 5) {
+            document.getElementById(id[count]).className = 'green';
+            document.getElementById(id[count + 1]).style.display = 'inherit';
+            clearInterval(demo);
+        } else {
+
+            document.getElementById(id[count]).className = 'appear';
+        }
+
+    }
 
 }
 
