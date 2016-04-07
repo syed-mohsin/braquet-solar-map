@@ -114,85 +114,67 @@ function CenterControl(controlDiv, map) {
     // FOR DEMO
     if (MYLIBRARY.getIsDemo()) {
         controlText.innerHTML += '<div class="action">\
-                                <div id="submit">\
-                                    <button class="braquet-btn" id="update">Update</button>\
-                                </div>\
-                                <div id="quote">\
-                                    <button class="braquet-btn" id="sendemail" onclick="quote()">Get a Quote</button>\
-                                </div>\
-                                <div id="email">\
-                                    <button class="braquet-btn" id="sendemail">Email Report</button>\
-                                </div>\
-                              </div>\
-                              <div id="bidDisplay">\
-                                    <div style="display:block; color:black; float:left;margin-right:10px; ">Top Bidder - </div>\
-                                    <div id="bid1"></div>\
-                                    <div id="bid2">  Finding suppliers...</div>\
-                                    <div id="bid3">  Ying Li: $0.82 per watt</div>\
-                                    <div id="bid4">  Lightway: $0.65 per watt</div>\
-                                    <div id="bid5">  SunPower: $0.63 per watt</div>\
-                                    <div id="bid6" style="color:#3c763d"> You got a panel supplier!</div>\
-                                    <div id="bid7">\
-                                    <img style="margin-top:5px" src="/static/images/logo-sunpower.jpg"><br>\
-                                    <img src="/static/images/sunpower-panel.jpg">\
+                                    <div id="submit">\
+                                        <button class="braquet-btn" id="update">Update</button>\
                                     </div>\
-                                </div>';
-    } else{
+                                    <div id="quote">\
+                                        <button class="braquet-btn" id="sendemail" onclick="quote()">Get a Quote</button>\
+                                    </div>\
+                                    <div id="email">\
+                                        <button class="braquet-btn" id="sendemail">Email Report</button>\
+                                    </div>\
+                                  </div>\
+                                  <div id="bidDisplay">\
+                                        <div style="display:block; color:black; float:left;margin-right:10px; ">Top Bidder - </div>\
+                                        <div id="bid1"></div>\
+                                        <div id="bid2">  Finding suppliers...</div>\
+                                        <div id="bid3">  Ying Li: $0.82 per watt</div>\
+                                        <div id="bid4">  Lightway: $0.65 per watt</div>\
+                                        <div id="bid5">  SunPower: $0.63 per watt</div>\
+                                        <div id="bid6" style="color:#3c763d"> You got a panel supplier!</div>\
+                                        <div id="bid7">\
+                                        <img style="margin-top:5px" src="/static/images/logo-sunpower.jpg"><br>\
+                                        <img src="/static/images/sunpower-panel.jpg">\
+                                  </div>'
+    } else {
 
     //live project settings html
-    controlText.innerHTML += '<div class="action">\
-                                <div id="submit">\
-                                    <button class="braquet-btn" id=update style="width:100%">Update</button>\
-                                </div>\
-                                <div id="email">\
-                                    <button class="braquet-btn" id="sendemail">Email Report</button>\
-                                </div>\
-                              </div>\
-                              <div id="bidDisplay">\
-                                    <div style="display:block; color:black; float:left;margin-right:10px; ">Top Bidder - </div>\
-                                    <div id="bid1"></div>\
-                                    <div id="bid2">  Finding suppliers...</div>\
-                                    <div id="bid3">  Ying Li: $0.82 per watt</div>\
-                                    <div id="bid4">  Lightway: $0.65 per watt</div>\
-                                    <div id="bid5">  SunPower: $0.63 per watt</div>\
-                                    <div id="bid6" style="color:#3c763d"> You got a panel supplier!</div>\
-                                    <div id="bid7">\
-                                    <img style="margin-top:5px" src="/static/images/logo-sunpower.jpg"><br>\
-                                    <img src="/static/images/sunpower-panel.jpg">\
+        controlText.innerHTML += '<div class="action">\
+                                    <div id="submit">\
+                                        <button class="braquet-btn" id=update style="width:100%">Update</button>\
                                     </div>\
-                                </div>';
-                            }
-}
+                                    <div id="email">\
+                                        <button class="braquet-btn" id="sendemail">Email Report</button>\
+                                    </div>\
+                                  </div>'
+            }
+    }
 
 function quote() {
 
     document.getElementById('bidDisplay').style.display = 'inherit';
 
-    id = ['bid1', 'bid2', 'bid3', 'bid4', 'bid5', 'bid6', 'bid7']
+    var id = ['bid1', 'bid2', 'bid3', 'bid4', 'bid5', 'bid6', 'bid7'];
 
-    document.getElementById(id[5]).style.display = 'none'
-    document.getElementById(id[1]).className = 'appear'
+    document.getElementById(id[5]).style.display = 'none';
+    document.getElementById(id[1]).className = 'appear';
+    var precount =1;
+    var demo = setInterval(function() { bid(precount,id); precount += 1}, 2000);
 
-    var demo = setInterval(bid, 2000);
+}
 
-    count = 0
+function bid(count, id) {
+    console.log(id[count]);
+    document.getElementById(id[count - 1]).style.display = 'none';
+    document.getElementById(id[count]).className = '';
+    document.getElementById(id[count]).style.display = 'inherit';
+    if (count == 5) {
+        document.getElementById(id[count]).className = 'green';
+        document.getElementById(id[count + 1]).style.display = 'inherit';
+        clearInterval(demo);
+    } else {
 
-    function bid() {
-
-        count += 1;
-        console.log(id[count])
-        document.getElementById(id[count - 1]).style.display = 'none';
-        document.getElementById(id[count]).className = '';
-        document.getElementById(id[count]).style.display = 'inherit'
-        if (count == 5) {
-            document.getElementById(id[count]).className = 'green';
-            document.getElementById(id[count + 1]).style.display = 'inherit';
-            clearInterval(demo);
-        } else {
-
-            document.getElementById(id[count]).className = 'appear';
-        }
-
+        document.getElementById(id[count]).className = 'appear';
     }
 
 }
