@@ -142,7 +142,7 @@ function CenterControl(controlDiv, map) {
     //live project settings html
     controlText.innerHTML += '<div class="action">\
                                 <div id="submit">\
-                                    <button class="braquet-btn" style="width:100%">Update</button>\
+                                    <button class="braquet-btn" id=update style="width:100%">Update</button>\
                                 </div>\
                                 <div id="email">\
                                     <button class="braquet-btn" id="sendemail">Email Report</button>\
@@ -290,6 +290,7 @@ function updateSystemListener() {
                              selected_polygon.panelWidth);
         selected_polygon.systemCapacity = output["s"];
         selected_polygon.pArray = output["arr"];
+        selected_polygon.numPanels = output["numPanels"]
         selected_polygon.latlngCenter = getPolygonCenter(selected_polygon.coordinates);
         getEnergyProduction(selected_polygon.latlngCenter, 
                     selected_polygon.tiltValue, selected_polygon.azimuthValue, 
