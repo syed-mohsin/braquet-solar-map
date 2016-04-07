@@ -29,26 +29,114 @@ input, select {
     vertical-align: super;
 }
 
-#submit {
-    text-align: center;
-    padding-bottom: 10px;
+#submit button {
+  float: left;
+  margin-right: 8px;
 }
 
 #email button {
-    background: #dff0d8;
-    color:#3c763d;
+  margin-top: 10px;
+  width: 100%;
 }
 
-#update {
-    color:white;
-    background:black;
-    width:80%;
-    font-weight: 300;
+.braquet-btn {
+    color: white;
+    background: black;
+    width: 48%;
+    border: none;
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
 }
 
 #settings span {
     margin-right:5px;
 }
+
+#bidDisplay {
+  display: none;
+  margin-top:20px;
+  padding-bottom: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+#bidDisplay div {
+    display: none;
+}
+
+#bid7 img{
+  width: 200px;
+}
+
+#bidDisplay div.appear {
+    color: black;
+    -webkit-animation-name: hello; /* Chrome, Safari, Opera */
+    -webkit-animation-duration: 2s; /* Chrome, Safari, Opera */
+    animation-name: hello;
+    animation-duration: 2s;
+}
+
+#bidDisplay div.green {
+    color: #3c763d;
+    -webkit-animation-name: selected; /* Chrome, Safari, Opera */
+    -webkit-animation-duration: 1s; /* Chrome, Safari, Opera */
+    animation-name: selected;
+    animation-duration: 1s;
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes hello {
+    0%   {color:white;}
+    25%  {color:white;}
+    50%  {color:black;}
+    75%  {color:black;}
+    100% {color:black;}
+}
+
+/* Standard syntax */
+@keyframes hello {
+    0%   {color:white;}
+    25%  {color:white;}
+    50%  {color:black;}
+    75%  {color:black;}
+    100% {color:black;}
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes selected {
+    0%   {color:white;}
+    25%  {color:white;}
+    50%  {color:#3c763d;}
+    75%  {color:#3c763d;}
+    100% {color:#3c763d;}
+}
+
+/* Standard syntax */
+@keyframes selected {
+    0%   {color:white;}
+    25%  {color:white;}
+    50%  {color:#3c763d;}
+    75%  {color:#3c763d;}
+    100% {color:#3c763d;}
+}
+
 
 .modal-body .screen-shot {
     width:350px;

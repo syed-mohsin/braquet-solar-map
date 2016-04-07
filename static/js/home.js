@@ -64,10 +64,7 @@ function getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapaci
 function CenterControl(controlDiv, map) {
     // Set CSS for the control border.
 
-    // FOR DEMO
-    if (MYLIBRARY.getIsDemo()) {
-        // add demo code
-    }
+    
 
     var controlUI = document.createElement('div');
     controlUI.id = 'control';
@@ -77,7 +74,7 @@ function CenterControl(controlDiv, map) {
     controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
     controlUI.style.padding = '10px';
     controlUI.style.textAlign = 'left';
-    controlUI.innerHTML = '<a data-toggle="collapse" href="#collapse1"><h5>Project Settings<span class="caret" style="margin-left:5px;"></span></h5></a>';
+    controlUI.innerHTML = '<a><h5>Project Settings<span class="caret" style="margin-left:5px;"></span></h5></a>';
     controlDiv.appendChild(controlUI);
 
     var selectPanel = document.createElement('select');
@@ -100,8 +97,6 @@ function CenterControl(controlDiv, map) {
 
     // Set CSS for the control interior.
     var controlText = document.createElement('div');
-    controlText.id = 'collapse1',
-    controlText.className = "panel-collapse collapse"
     controlText.style.color = 'rgb(25,25,25)';
     controlText.style.fontSize = '11px';
     controlText.style.lineHeight = '10px';
@@ -116,14 +111,90 @@ function CenterControl(controlDiv, map) {
     controlText.appendChild(selectPanel)
     controlUI.appendChild(controlText);
 
-    controlText.innerHTML += '<div class="action">\
+    // FOR DEMO
+    if (MYLIBRARY.getIsDemo()) {
+        controlText.innerHTML += '<div class="action">\
                                 <div id="submit">\
-                                    <button class="btn btn-default" id="update">Update</button>\
+                                    <button class="braquet-btn">Update</button>\
+                                </div>\
+                                <div id="quote">\
+                                    <button class="braquet-btn" id="sendemail" onclick="quote()">Get a Quote</button>\
                                 </div>\
                                 <div id="email">\
-                                    <button class="btn btn-default" id="sendemail">Email Report</button>\
+                                    <button class="braquet-btn" id="sendemail">Email Report</button>\
                                 </div>\
-                              </div>';
+                              </div>\
+                              <div id="bidDisplay">\
+                                    <div style="display:block; color:black; float:left;margin-right:10px; ">Top Bidder - </div>\
+                                    <div id="bid1"></div>\
+                                    <div id="bid2">  Finding suppliers...</div>\
+                                    <div id="bid3">  Ying Li: $0.82 per watt</div>\
+                                    <div id="bid4">  Lightway: $0.65 per watt</div>\
+                                    <div id="bid5">  SunPower: $0.63 per watt</div>\
+                                    <div id="bid6" style="color:#3c763d"> You got a panel supplier!</div>\
+                                    <div id="bid7">\
+                                    <img style="margin-top:5px" src="/static/images/logo-sunpower.jpg"><br>\
+                                    <img src="/static/images/sunpower-panel.jpg">\
+                                    </div>\
+                                </div>';
+    } else{
+
+    //live project settings html
+    controlText.innerHTML += '<div class="action">\
+                                <div id="submit">\
+                                    <button class="braquet-btn" style="width:100%">Update</button>\
+                                </div>\
+                                <div id="email">\
+                                    <button class="braquet-btn" id="sendemail">Email Report</button>\
+                                </div>\
+                              </div>\
+                              <div id="bidDisplay">\
+                                    <div style="display:block; color:black; float:left;margin-right:10px; ">Top Bidder - </div>\
+                                    <div id="bid1"></div>\
+                                    <div id="bid2">  Finding suppliers...</div>\
+                                    <div id="bid3">  Ying Li: $0.82 per watt</div>\
+                                    <div id="bid4">  Lightway: $0.65 per watt</div>\
+                                    <div id="bid5">  SunPower: $0.63 per watt</div>\
+                                    <div id="bid6" style="color:#3c763d"> You got a panel supplier!</div>\
+                                    <div id="bid7">\
+                                    <img style="margin-top:5px" src="/static/images/logo-sunpower.jpg"><br>\
+                                    <img src="/static/images/sunpower-panel.jpg">\
+                                    </div>\
+                                </div>';
+                            }
+}
+
+function quote(){
+
+document.getElementById('bidDisplay').style.display = 'inherit';
+
+id = ['bid1', 'bid2', 'bid3', 'bid4', 'bid5', 'bid6', 'bid7']
+
+document.getElementById(id[5]).style.display = 'none'
+document.getElementById(id[1]).className = 'appear'
+
+var demo = setInterval(bid,2000);
+
+count =0
+
+function bid(){
+
+    count += 1;
+    console.log(id[count])
+    document.getElementById(id[count-1]).style.display = 'none';
+    document.getElementById(id[count]).className = '';
+    document.getElementById(id[count]).style.display = 'inherit'
+    if(count==5){
+        document.getElementById(id[count]).className = 'green';
+        document.getElementById(id[count+1]).style.display = 'inherit';
+        clearInterval(demo);
+    }else{
+    
+    document.getElementById(id[count]).className = 'appear';
+}
+    
+}
+
 }
 
 function sendEmailReportListener() {
@@ -643,7 +714,7 @@ function initialize() {
         drawingMode: null,
         drawingControl: true,
         drawingControlOptions: {
-          position: google.maps.ControlPosition.TOP_RIGHT,
+          position: google.maps.ControlPosition.TOP_CENTER,
           drawingModes: [
             google.maps.drawing.OverlayType.POLYGON
           ]
@@ -655,7 +726,10 @@ function initialize() {
             draggable: false
         }
     });
+    
     draw.setMap(map);
+
+
     // event listener to obtain lat/lng coordinates from drawn polygon **************
     google.maps.event.addListener(draw, 'polygoncomplete', function (polygon) {
         // switch back to the hand option
