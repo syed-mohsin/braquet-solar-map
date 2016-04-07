@@ -133,15 +133,16 @@ function CenterControl(controlDiv, map) {
                                         <div id="bid5">  SunPower: $0.63 per watt</div>\
                                         <div id="bid6" style="color:#3c763d"> You got a panel supplier!</div>\
                                         <div id="bid7">\
-                                        <img style="margin-top:5px" src="/static/images/logo-sunpower.jpg"><br>\
-                                        <img src="/static/images/sunpower-panel.jpg">\
+                                            <img style="margin-top:5px" src="/static/images/logo-sunpower.jpg"><br>\
+                                            <img src="/static/images/sunpower-panel.jpg">\
+                                        </div>\
                                   </div>'
     } else {
 
     //live project settings html
         controlText.innerHTML += '<div class="action">\
                                     <div id="submit">\
-                                        <button class="braquet-btn" id=update style="width:100%">Update</button>\
+                                        <button class="braquet-btn" id="update" style="width:100%">Update</button>\
                                     </div>\
                                     <div id="email">\
                                         <button class="braquet-btn" id="sendemail">Email Report</button>\
@@ -150,34 +151,48 @@ function CenterControl(controlDiv, map) {
             }
     }
 
-function quote() {
+// courtesy of Stack Overflow question # 2956966
+// executes a function at a specified interval X times
+function setIntervalX(callback, delay, repetitions) {
+    var x = 0;
+    var intervalID = setInterval(function () {
+        callback();
 
+        if (++x === repetitions) {
+            clearInterval(intervalID);
+        }
+    }, delay);
+}
+
+function quote() {
     document.getElementById('bidDisplay').style.display = 'inherit';
 
     var id = ['bid1', 'bid2', 'bid3', 'bid4', 'bid5', 'bid6', 'bid7'];
+    for (var i=0;i<id.length;i++) 
+        document.getElementById(id[i]).style.display = 'none';
+
 
     document.getElementById(id[5]).style.display = 'none';
     document.getElementById(id[1]).className = 'appear';
-    var precount =1;
-    var demo = setInterval(function() { bid(precount,id); precount += 1}, 2000);
 
+    var count = 0;
+    // begin animation
+    setIntervalX(function () {
+        count++;
+        console.log(id[count]);
+        if (count != 6)
+            document.getElementById(id[count - 1]).style.display = 'none';
+        document.getElementById(id[count]).className = '';
+        document.getElementById(id[count]).style.display = 'inherit';
+        if (count == 5) {
+            document.getElementById(id[count]).className = 'green';
+            document.getElementById(id[count + 1]).style.display = 'inherit';
+        } else {
+            document.getElementById(id[count]).className = 'appear';
+        }
+    }, 2000, id.length-1);
 }
 
-function bid(count, id) {
-    console.log(id[count]);
-    document.getElementById(id[count - 1]).style.display = 'none';
-    document.getElementById(id[count]).className = '';
-    document.getElementById(id[count]).style.display = 'inherit';
-    if (count == 5) {
-        document.getElementById(id[count]).className = 'green';
-        document.getElementById(id[count + 1]).style.display = 'inherit';
-        clearInterval(demo);
-    } else {
-
-        document.getElementById(id[count]).className = 'appear';
-    }
-
-}
 
 function sendEmailReportListener() {
     // listener for email report button click
