@@ -115,7 +115,7 @@ function CenterControl(controlDiv, map) {
     if (MYLIBRARY.getIsDemo()) {
         controlText.innerHTML += '<div class="action">\
                                 <div id="submit">\
-                                    <button class="braquet-btn">Update</button>\
+                                    <button class="braquet-btn" id="update">Update</button>\
                                 </div>\
                                 <div id="quote">\
                                     <button class="braquet-btn" id="sendemail" onclick="quote()">Get a Quote</button>\

@@ -65,6 +65,10 @@ input, select {
     border-radius: 4px;
 }
 
+.braquet-btn:hover {
+  background: #191919;
+}
+
 #settings span {
     margin-right:5px;
 }
