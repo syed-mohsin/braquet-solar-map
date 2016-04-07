@@ -118,7 +118,7 @@ function CenterControl(controlDiv, map) {
                                         <button class="braquet-btn" id="update">Update</button>\
                                     </div>\
                                     <div id="quote">\
-                                        <button class="braquet-btn" id="sendemail" onclick="quote()">Get a Quote</button>\
+                                        <button class="braquet-btn" id="quotebtn" onclick="quote()">Get a Quote</button>\
                                     </div>\
                                     <div id="email">\
                                         <button class="braquet-btn" id="sendemail">Email Report</button>\
@@ -197,14 +197,22 @@ function quote() {
 function sendEmailReportListener() {
     // listener for email report button click
     document.getElementById('sendemail').onmousedown = function(){
+        console.log("email button clicked");
         var selected_polygon = getSelectedPolygon();
+        var current_bounds = map.getBounds();
         // zoom into polygon
-        // setZoomOnPolygon(selected_polygon);
-        map.setCenter(selected_polygon.latlngCenter);
-        map.setZoom(20);
+        setZoomOnPolygon(selected_polygon);
+        var updated_bounds = map.getBounds();
 
-        listener = google.maps.event.addListenerOnce(map, 'tilesloaded', function(event) {
-            setTimeout(sendEmail(selected_polygon), 5000);
+        // bounds did not change after zoom
+        if (current_bounds === updated_bounds) {
+            sendEmail(selected_polygon)
+            return;
+        }
+
+        listener = google.maps.event.addListenerOnce(map, 'idle', function(event) {
+            console.log("made it past idle");
+            sendEmail(selected_polygon);
         });
 
         setTimeout(function() { google.maps.event.removeListener(listener)}, 2000);
@@ -309,7 +317,8 @@ function selectPolygon(polygon_object) {
     polygon_object.polygon.setOptions({fillColor: 'green',
                                        strokeColor: 'green'});
 
-    var project_stats = document.getElementById("projectStats")
+    setZoomOnPolygon(polygon_object);
+    var project_stats = document.getElementById("projectStats");
     project_stats.innerHTML = "Nameplate Capacity: " + polygon_object.systemCapacity + "kW<br>";
     project_stats.innerHTML += "# of panels: " + polygon_object.numPanels + "<br>";
     project_stats.innerHTML += "Energy Production: " + polygon_object.energyProduction[2] + "kWh (monthly)";
@@ -621,6 +630,7 @@ function setZoomOnPolygon(polygon_object) {
         bound.extend( new google.maps.LatLng(polygon_object.coordinates[i].lat(), 
             polygon_object.coordinates[i].lng()));
 
+    map.setZoom(20);
     map.fitBounds(bound);
 }
 
