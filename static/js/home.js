@@ -259,6 +259,8 @@ function sendEmail(selected_polygon) {
                 success: function (result) {
                     if (result === "success")
                         console.log("success");
+                    else
+                        console.log(result);
                 }
             });
         }

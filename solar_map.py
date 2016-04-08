@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response, json, jsonify
+from flask import Flask, render_template, request, Response, json, jsonify, send_file
 from flask_mail import Mail
 from flask_mail import Message
 from pymongo import MongoClient
@@ -104,8 +104,8 @@ def sendEmailReport():
 		panelType = str(request.json['panelType'])
 
 		# screenshot image location
-		img_loc = "static/maps/rooftop_screenshot.png"
-		chart_loc = "static/maps/production_chart.png"
+		img_loc = "/static/maps/rooftop_screenshot.png"
+		chart_loc = "/static/maps/production_chart.png"
 
 		# decode base64 png screenshot
 		fp1 = open(img_loc, "wb")
@@ -134,6 +134,15 @@ def sendEmailReport():
 	else:
 		return "404 ERROR"
 
+@app.route("/get_screenshot")
+def getScreenshot():
+	filename = "static/maps/rooftop_screenshot.png"
+	return send_file(filename, mimetype'image/png')
+
+@app.route("/get_chart")
+def getChart():
+	filename = "static/maps/production_chart.png"
+	return send_file(filename, mimetype'image/png')
 
 if __name__ == "__main__":
 	app.run(debug=True)
