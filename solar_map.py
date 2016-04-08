@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, Response, json, jsonify, send_file
+from flask.ext.stormpath import StormpathManager, login_required, groups_required, user
 from flask_mail import Mail
 from flask_mail import Message
 from pymongo import MongoClient
@@ -21,9 +22,17 @@ MAIL_USERNAME = credentials.MAIL_USER_NAME
 MAIL_PASSWORD = credentials.MAIL_PASSWORD
 
 app = Flask(__name__)
+
+# app configurations
 app.config.from_object(__name__)
+app.config['SECRET_KEY'] = credentials.STORMPATH_SECRET_KEY
+app.config['STORMPATH_API_KEY_FILE'] = credentials.STORMPATH_API_KEY_FILE
+app.config['STORMPATH_APPLICATION'] = credentials.STORMPATH_APPLICATION
+
+# clients connected to app
 mail = Mail(app)
-# mongo = credentials.connect()
+stormpath_manager = StormpathManager(app)
+mongo = credentials.connect()
 google_places = GooglePlaces(credentials.API_KEY)
 geolocator = Nominatim()
 
