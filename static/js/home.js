@@ -62,10 +62,6 @@ function getEnergyProduction(polygon, callback) {
 }
 
 function CenterControl(controlDiv, map) {
-    // Set CSS for the control border.
-
-    
-
     var controlUI = document.createElement('div');
     controlUI.id = 'control';
     controlUI.style.backgroundColor = '#fff';
@@ -748,6 +744,12 @@ function initialize() {
     centerControlDiv.index = 1;
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(centerControlDiv);
 
+    // position polygon tracking list
+    var polygonListDiv = document.createElement('div');
+    polygonListDiv.className = "list-group";
+    polygonListDiv.id = "polygon_list";
+    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(polygonListDiv);
+
     // position center control manager2
     // var centerControlDiv2 = document.createElement('div');
     // var centerControl2 = new CenterControl2(centerControlDiv2, map);
@@ -785,6 +787,19 @@ function initialize() {
         // create polygon object
         var p = new Polygon(polygon);
         MYLIBRARY.addToPolygons(p);
+
+        // add a new polygon button to polygon_list
+        var p_list = document.getElementById('polygon_list');
+        var entry = document.createElement('button');
+        entry.className = "list-group-item";
+        entry.innerHTML = "Rooftop #" + MYLIBRARY.getPolygons().length;
+        p_list.appendChild(entry);
+
+        // add a listener for polygon_list button
+        entry.onmousedown = function () {
+            selectPolygon(p);
+        };
+
         // get array of vertices in lat/lng format of polygon
         var output = null;
 
