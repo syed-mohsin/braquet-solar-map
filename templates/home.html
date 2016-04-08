@@ -17,8 +17,11 @@
         google.charts.load('current', {packages: ['corechart', 'table']});
         MYLIBRARY.init({"map_id"      : "{{mymap.identifier}}",
                         "map_name"    : "{{mymap.varname}}",
-                        "panel_data"  : {{mymap.panel_data|tojson}},
-                        "is_demo"     : {{is_demo|tojson}}
+                        "panel_data"   : {{mymap.panel_data|tojson}},
+                        "is_demo"      : {{is_demo|tojson}},
+                        "map"          : null,
+                        "polygons"     : [],
+                        "chart_base64" : null,
                       });
       </script>
       <script src="/static/js/home.js" type="text/javascript"></script>

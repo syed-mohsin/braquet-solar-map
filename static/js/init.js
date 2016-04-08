@@ -6,10 +6,10 @@ var MYLIBRARY = MYLIBRARY || (function() {
 			_args = Args;
 			// some other initializing if necessary
 		},
-		getMapId : function() {
+		getMapId      : function() {
 			return _args["map_id"];
 		},
-		getMapName : function() {
+		getMapName    : function() {
 			return _args["map_name"];
 		},
 		getPanelSpecs : function() {
@@ -17,6 +17,26 @@ var MYLIBRARY = MYLIBRARY || (function() {
 		},
 		getIsDemo     : function() {
 			return _args["is_demo"];
-		}
+		},
+		getMap  	  : function() {
+			return _args["map"];
+		},
+		getPolygons   : function() {
+			return _args["polygons"];
+		},
+		getChartImg   : function() {
+			return _args["chart_base64"];
+		},
+		setChartImg   : function(img) {
+			_args["chart_base64"] = img;
+		},
+		addToPolygons : function(polygon) {
+			if (_args["polygons"] == null)
+				return -1;
+
+			_args["polygons"].push(polygon);
+			return 0;
+		},
+
 	};
 }());

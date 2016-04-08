@@ -101,6 +101,7 @@ def sendEmailReport():
 		chart_base64 = str(request.json['chart'])[22:]
 		energy = request.json['energy']['2']
 		numPanels = str(request.json['numPanels'])
+		panelType = str(request.json['panelType'])
 
 		# screenshot image location
 		img_loc = "static/maps/rooftop_screenshot.png"
@@ -118,7 +119,7 @@ def sendEmailReport():
 					  sender=("Braquet", credentials.MAIL_USER_NAME),
 					  recipients=["syedm.90@gmail.com","takayuki.koizumi@gmail.com"])
 
-		msg.html = render_template('email.html', energy=energy, numPanels=numPanels)
+		msg.html = render_template('email.html', energy=energy, numPanels=numPanels, panelType=panelType)
 
 		with app.open_resource(img_loc) as screenshot:
 			msg.attach(img_loc, "image/png", screenshot.read())

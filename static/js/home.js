@@ -29,30 +29,30 @@ function drawChart() {
     }
 
     var chart_canvas = document.createElement('canvas');
-    chart_canvas.width = 500;
-    chart_canvas.height = 400;
+    chart_canvas.width = 300;
+    chart_canvas.height = 300;
 
     var ctx = chart_canvas.getContext('2d');
 
     var chart = new google.visualization.ColumnChart(chart_canvas);
 
     google.visualization.events.addListener(chart, 'ready', function() {
-        chart_base64 = chart.getImageURI();
+        MYLIBRARY.setChartImg(chart.getImageURI());
         canvas = null; // delete DOM
     })
 
     chart.draw(data, options);
 }
 
-function getEnergyProduction(latlngCenter, tiltValue, azimuthValue, systemCapacity, callback) {
+function getEnergyProduction(polygon, callback) {
     $.ajax({
         type : "POST",
         url  : "/nrel",
-        data : JSON.stringify({"lat"      : latlngCenter.lat(),
-                               "lng"      : latlngCenter.lng(),
-                               "tilt"     : tiltValue, 
-                               "azimuth"  : azimuthValue,
-                               "capacity" : systemCapacity}, 
+        data : JSON.stringify({"lat"      : polygon.latlngCenter.lat(),
+                               "lng"      : polygon.latlngCenter.lng(),
+                               "tilt"     : polygon.tiltValue, 
+                               "azimuth"  : polygon.azimuthValue,
+                               "capacity" : polygon.systemCapacity}, 
                                null, '\t'),
         contentType: 'application/json; charset=UTF-8',
         success: function (result) {
@@ -89,6 +89,7 @@ function CenterControl(controlDiv, map) {
         var optionPanel = document.createElement('option');
         optionPanel.innerHTML = p['model_name'];
         optionPanel.value = p['id'];
+        optionPanel.id = p['model_name'];
         optionPanel.setAttribute('data-wattage', p['wattage']);
         optionPanel.setAttribute('data-length', p['length']);
         optionPanel.setAttribute('data-width', p['width']);
@@ -249,9 +250,10 @@ function sendEmail(selected_polygon) {
                 type : "POST",
                 url  : "/sendEmailReport",
                 data : JSON.stringify({"screenshot" : dataUrl,
-                                       "chart"      : chart_base64,
+                                       "chart"      : MYLIBRARY.getChartImg(),
                                        "energy"     : selected_polygon.energyProduction,
-                                       "numPanels"  : selected_polygon.numPanels}, 
+                                       "numPanels"  : selected_polygon.numPanels,
+                                       "panelType"  : selected_polygon.panelType}, 
                                        null, '\t'),
                 contentType: 'application/json; charset=UTF-8',
                 success: function (result) {
@@ -277,11 +279,13 @@ function updateSystemListener() {
             selected_polygon.rowSpaceValue = document.getElementById('rowSpace').value;
         if (document.getElementById('orientation').value != "")
             selected_polygon.orientationValue = document.getElementById('orientation').value;
-        if (document.getElementById('panel_specs').value != "")
-            var panelId = document.getElementById('panel_specs').value
-            selected_polygon.moduleWattage = document.getElementById('panel_specs')[panelId].getAttribute('data-wattage')
-            selected_polygon.panelLength = document.getElementById('panel_specs')[panelId].getAttribute('data-length')
-            selected_polygon.panelWidth = document.getElementById('panel_specs')[panelId].getAttribute('data-width')
+        if (document.getElementById('panel_specs').value != "") {
+            var panelId = document.getElementById('panel_specs').value;
+            selected_polygon.panelType = document.getElementById('panel_specs')[panelId].text;
+            selected_polygon.moduleWattage = document.getElementById('panel_specs')[panelId].getAttribute('data-wattage');
+            selected_polygon.panelLength = document.getElementById('panel_specs')[panelId].getAttribute('data-length');
+            selected_polygon.panelWidth = document.getElementById('panel_specs')[panelId].getAttribute('data-width');
+        }
         
         selected_polygon.pArray.setMap(null); 
         output = panelLayout(selected_polygon.polygon, 
@@ -297,16 +301,15 @@ function updateSystemListener() {
         selected_polygon.pArray = output["arr"];
         selected_polygon.numPanels = output["numPanels"]
         selected_polygon.latlngCenter = getPolygonCenter(selected_polygon.coordinates);
-        getEnergyProduction(selected_polygon.latlngCenter, 
-                    selected_polygon.tiltValue, selected_polygon.azimuthValue, 
-                    selected_polygon.systemCapacity, function(data) {
-            
+        getEnergyProduction(selected_polygon, function(data) {
+            // update energy production reading
             selected_polygon.energyProduction = data;
             // update table with system info
             var project_stats = document.getElementById("projectStats")
             project_stats.innerHTML = "Nameplate Capacity: " + selected_polygon.systemCapacity + "kW<br>";
             project_stats.innerHTML += "# of panels: " + selected_polygon.numPanels + "<br>";
-            project_stats.innerHTML += "Energy Production: " + selected_polygon.energyProduction[2] + "kWh (monthly)";
+            project_stats.innerHTML += "Energy Production: " + selected_polygon.energyProduction[2] + "kWh (monthly)<br>";
+            project_stats.innerHTML += "Panel Type: " + selected_polygon.panelType;
         });   
     };
 }
@@ -314,6 +317,7 @@ function updateSystemListener() {
 function selectPolygon(polygon_object) {
     unselectAllPolygons();
     polygon_object.click_status = 1;
+    console.log(polygon_object.polygon);
     polygon_object.polygon.setOptions({fillColor: 'green',
                                        strokeColor: 'green'});
 
@@ -321,10 +325,12 @@ function selectPolygon(polygon_object) {
     var project_stats = document.getElementById("projectStats");
     project_stats.innerHTML = "Nameplate Capacity: " + polygon_object.systemCapacity + "kW<br>";
     project_stats.innerHTML += "# of panels: " + polygon_object.numPanels + "<br>";
-    project_stats.innerHTML += "Energy Production: " + polygon_object.energyProduction[2] + "kWh (monthly)";
+    project_stats.innerHTML += "Energy Production: " + polygon_object.energyProduction[2] + "kWh (monthly)<br>";
+    project_stats.innerHTML += "Panel Type: " + polygon_object.panelType;
 }
 
 function getSelectedPolygon() {
+    var polygons = MYLIBRARY.getPolygons();
     for (i=0;i<polygons.length;i++) {
         if (polygons[i].click_status == 1)
             return polygons[i];
@@ -332,6 +338,7 @@ function getSelectedPolygon() {
 }
 
 function unselectAllPolygons() {
+    var polygons = MYLIBRARY.getPolygons();
     for (i=0;i<polygons.length;i++) {
         if (polygons[i].click_status == 1) {
             polygons[i].click_status = 0;
@@ -659,13 +666,41 @@ function Polygon(polygon) // polygon object
     this.latlngCenter = getPolygonCenter(this.coordinates); // updated in panelLayout()
     this.energyProduction = "loading...";
     this.pArray = null;
+    this.pArrayListener = null;
     this.numPanels = "loading...";
+    this.panelType = null;
+
+    this.updatePolygon = function () {
+        this.coordinates = this.polygon.getPath().getArray();
+        this.pArray.setMap(null); 
+        
+        // must remove old listener on previous panelArray
+        google.maps.event.removeListener(this.pArrayListener);
+
+        // obtain data from new panel layout
+        var output = panelLayout(this.polygon, this.coordinates, Number(this.azimuthValue), this.orientationValue, 
+                             this.rowSpaceValue, this.tiltValue, this.moduleWattage, this.panelLength, this.panelWidth);
+
+        this.systemCapacity = output["s"];
+        this.pArray = output["arr"];
+        this.numPanels = output["numPanels"];
+        this.latlngCenter = getPolygonCenter(this.coordinates);
+
+        var p = this; // need to pass the scope into the callback function for getEnergyProduction()
+        getEnergyProduction(p, function(data) {
+            p.energyProduction = data;
+            selectPolygon(p); // must call this function again to update panel settings display
+        });
+
+        // must add a new listener on the updated panel array
+        this.pArrayListener = google.maps.event.addListener(this.pArray, 'click', function () { 
+            selectPolygon(p); 
+        });
+    }
 }
 
 //***GLOBAL VARIABLES******
-var polygons = [];
 var map;
-var chart_base64;
 
 function initialize() {
     var markers = [];
@@ -747,7 +782,7 @@ function initialize() {
 
         // create polygon object
         var p = new Polygon(polygon);
-        polygons.push(p);
+        MYLIBRARY.addToPolygons(p);
         // get array of vertices in lat/lng format of polygon
         var output = null;
 
@@ -756,24 +791,33 @@ function initialize() {
 
         // ***generate default panel layout independent of other listeners
         // requires lat() as lat/lng here are functions not keys in a dictionary
-        output = panelLayout(polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage, p.panelLength, p.panelWidth);
+        output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, 
+                             p.rowSpaceValue, p.tiltValue, p.moduleWattage, p.panelLength, p.panelWidth);
         p.systemCapacity = output["s"];
         p.pArray = output["arr"];
         p.numPanels = output["numPanels"];
-        getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
+
+        // get type of panel
+        var panel_specs = document.getElementById('panel_specs');
+        var panelId = panel_specs.value;
+        p.panelType = panel_specs[panelId].text;
+
+        // get energy production data and update panel display
+        getEnergyProduction(p, function(data) {
             p.energyProduction = data;
             // update table with system info
             var project_stats = document.getElementById("projectStats")
             project_stats.innerHTML = "Nameplate Capacity: " + p.systemCapacity + "kW<br>";
             project_stats.innerHTML += "# of panels: " + p.numPanels + "<br>";
-            project_stats.innerHTML += "Energy Production: " + p.energyProduction[2] + "kWh (monthly)";
+            project_stats.innerHTML += "Energy Production: " + p.energyProduction[2] + "kWh (monthly)<br>";
+            project_stats.innerHTML += "Panel Type: " + p.panelType;
 
             // listener for click on polygon
             google.maps.event.addListener(p.polygon, 'click', function () {
                 // select this polygon and unselect all others
                 selectPolygon(p);
             });
-            google.maps.event.addListener(p.pArray, 'click', function () {
+            p.pArrayListener = google.maps.event.addListener(p.pArray, 'click', function () {
                 selectPolygon(p);
             });
         });
@@ -781,53 +825,17 @@ function initialize() {
         // listen for edit event on moving existing vertices
         google.maps.event.addListener(p.polygon.getPath(), "set_at", function() {
             selectPolygon(p);
-            p.coordinates = p.polygon.getPath().getArray();
-            p.pArray.setMap(null); 
-            output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage, p.panelLength, p.panelWidth);
-            p.systemCapacity = output["s"];
-            p.pArray = output["arr"];
-            p.numPanels = output["numPanels"];
-            p.latlngCenter = getPolygonCenter(p.coordinates);
-            getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
-                p.energyProduction = data;
-                selectPolygon(p);
-            });
-
-            google.maps.event.addListener(p.pArray, 'click', function () { selectPolygon(p); });
+            p.updatePolygon();
         })
         // listen for edit event on adding new vertices
         google.maps.event.addListener(p.polygon.getPath(), "insert_at", function() {
             selectPolygon(p);
-            p.coordinates = p.polygon.getPath().getArray();
-            p.pArray.setMap(null); 
-            output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage, p.panelLength, p.panelWidth);
-            p.systemCapacity = output["s"];
-            p.pArray = output["arr"];
-            p.numPanels = output["numPanels"];
-            p.latlngCenter = getPolygonCenter(p.coordinates);
-            getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
-                p.energyProduction = data;
-                selectPolygon(p);
-            });
-
-            google.maps.event.addListener(p.pArray, 'click', function () { selectPolygon(p); });
+            p.updatePolygon();
         })
         // listen for undo edit event on polygon
         google.maps.event.addListener(p.polygon.getPath(), "remove_at", function() {
             selectPolygon(p);
-            p.coordinates = p.polygon.getPath().getArray();
-            p.pArray.setMap(null); 
-            output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, p.rowSpaceValue, p.tiltValue, p.moduleWattage, p.panelLength, p.panelWidth);
-            p.systemCapacity = output["s"];
-            p.pArray = output["arr"];
-            p.numPanels = output["numPanels"];
-            p.latlngCenter = getPolygonCenter(p.coordinates);
-            getEnergyProduction(p.latlngCenter, p.tiltValue, p.azimuthValue, p.systemCapacity, function(data) {
-                p.energyProduction = data;
-                selectPolygon(p);
-            });
-
-            google.maps.event.addListener(p.pArray, 'click', function () { selectPolygon(p); });
+            p.updatePolygon();
         })
 
         // listen for mouseover polygon event
