@@ -137,12 +137,12 @@ def sendEmailReport():
 @app.route("/get_screenshot")
 def getScreenshot():
 	filename = "static/maps/rooftop_screenshot.png"
-	return send_file(filename, mimetype'image/png')
+	return send_file(filename, mimetype='image/png')
 
 @app.route("/get_chart")
 def getChart():
 	filename = "static/maps/production_chart.png"
-	return send_file(filename, mimetype'image/png')
+	return send_file(filename, mimetype='image/png')
 
 if __name__ == "__main__":
 	app.run(debug=True)
