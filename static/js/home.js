@@ -285,20 +285,13 @@ function updateSystemListener() {
             selected_polygon.panelWidth = document.getElementById('panel_specs')[panelId].getAttribute('data-width');
         }
         
+        // remove previous panel layout
         selected_polygon.pArray.setMap(null); 
-        output = panelLayout(selected_polygon.polygon, 
-                             selected_polygon.coordinates, 
-                             Number(selected_polygon.azimuthValue), 
-                             selected_polygon.orientationValue, 
-                             selected_polygon.rowSpaceValue, 
-                             selected_polygon.tiltValue, 
-                             selected_polygon.moduleWattage, 
-                             selected_polygon.panelLength, 
-                             selected_polygon.panelWidth);
-        selected_polygon.systemCapacity = output["s"];
-        selected_polygon.pArray = output["arr"];
-        selected_polygon.numPanels = output["numPanels"]
-        selected_polygon.latlngCenter = getPolygonCenter(selected_polygon.coordinates);
+    
+        // generate a new panel layout
+        selected_polygon.updatePanelLayout();
+    
+        // obtain updated energy production data based on new panellayout
         getEnergyProduction(selected_polygon, function(data) {
             // update energy production reading
             selected_polygon.energyProduction = data;
@@ -441,12 +434,22 @@ function mToCoordinates(solarWidth, latlngCenter){
     return pixelToWorld;
 }
 
-function panelLayout(polygon, coordinates, azimuth, orientation, rowSpace, tilt, moduleWattage, panelLength, panelWdith) {
+function panelLayout(p) {
     //azimuth - angle of panel from true North
     //tilt - angle of panel from ground - not working properly for portrait..might be the difference between latitude/longitude conversion from meters
     //rowSpace - space between rows 
     //orientation - 'landscape' or 'portrait'
     //moduleWattage - wattage of each panel
+
+    var polygon = p.polygon;
+    var coordinates = p.coordinates;
+    var azimuth = p.azimuth;
+    var orientation = p.orientation;
+    var rowSpace = p.rowSpace;
+    var tilt = p.tilt;
+    var moduleWattage = p.moduleWattage;
+    var panelLength = p.panelLength;
+    var panelWdith = p.panelWdith;
 
     var latlngCenter = getPolygonCenter(coordinates);
 
@@ -619,14 +622,11 @@ function panelLayout(polygon, coordinates, azimuth, orientation, rowSpace, tilt,
     });
 
 
-    var systemCapacity = moduleWattage * solarSystemXY.length/1000;
-    var numPanels = solarSystemXY.length;
-
-    return { p: polygon,
-             s: systemCapacity,
-             arr: panelArray,
-             numPanels: numPanels
-           }
+    // update polygon panel array parameters here
+    p.systemCapacity = moduleWattage * solarSystemXY.length/1000;
+    p.panelArray = panelArray;
+    p.numPanels = solarSystemXY.length;
+    p.latlngCenter = latlngCenter;
 }
 
 function setZoomOnPolygon(polygon_object) {
@@ -668,6 +668,8 @@ function Polygon(polygon) // polygon object
     this.numPanels = "loading...";
     this.panelType = null;
 
+    this.updatePanelLayout = panelLayout(this);
+
     this.updatePolygon = function () {
         this.coordinates = this.polygon.getPath().getArray();
         this.pArray.setMap(null); 
@@ -676,12 +678,8 @@ function Polygon(polygon) // polygon object
         google.maps.event.removeListener(this.pArrayListener);
 
         // obtain data from new panel layout
-        var output = panelLayout(this.polygon, this.coordinates, Number(this.azimuthValue), this.orientationValue, 
-                             this.rowSpaceValue, this.tiltValue, this.moduleWattage, this.panelLength, this.panelWidth);
+        updatePanelLayout(this);
 
-        this.systemCapacity = output["s"];
-        this.pArray = output["arr"];
-        this.numPanels = output["numPanels"];
         this.latlngCenter = getPolygonCenter(this.coordinates);
 
         var p = this; // need to pass the scope into the callback function for getEnergyProduction()
@@ -750,12 +748,6 @@ function initialize() {
     polygonListDiv.id = "polygon_list";
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(polygonListDiv);
 
-    // position center control manager2
-    // var centerControlDiv2 = document.createElement('div');
-    // var centerControl2 = new CenterControl2(centerControlDiv2, map);
-    // centerControlDiv2.index = 1;
-    // map.controls[google.maps.ControlPosition.TOP_LEFT].push(centerControlDiv2);
-
     // drawing manager
     var draw = new google.maps.drawing.DrawingManager({
         drawingMode: null,
@@ -786,6 +778,8 @@ function initialize() {
 
         // create polygon object
         var p = new Polygon(polygon);
+
+        // add to global list of polygons
         MYLIBRARY.addToPolygons(p);
 
         // add a new polygon button to polygon_list
@@ -808,11 +802,7 @@ function initialize() {
 
         // ***generate default panel layout independent of other listeners
         // requires lat() as lat/lng here are functions not keys in a dictionary
-        output = panelLayout(p.polygon, p.coordinates, Number(p.azimuthValue), p.orientationValue, 
-                             p.rowSpaceValue, p.tiltValue, p.moduleWattage, p.panelLength, p.panelWidth);
-        p.systemCapacity = output["s"];
-        p.pArray = output["arr"];
-        p.numPanels = output["numPanels"];
+        p.updatePanelLayout();
 
         // get type of panel
         var panel_specs = document.getElementById('panel_specs');
