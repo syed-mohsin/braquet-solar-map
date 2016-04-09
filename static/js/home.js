@@ -36,6 +36,7 @@ function drawChart() {
 
     var chart = new google.visualization.ColumnChart(chart_canvas);
 
+    // save google map screenshot for email report once it is ready
     google.visualization.events.addListener(chart, 'ready', function() {
         MYLIBRARY.setChartImg(chart.getImageURI());
         canvas = null; // delete DOM
@@ -105,7 +106,7 @@ function CenterControl(controlDiv, map) {
     controlText.innerHTML += '<input class="form-control" id ="rowSpace" type="text" placeholder="Row space (>1 ft)">';
     controlText.innerHTML += '<select class="form-control" id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select>';
     
-    controlText.appendChild(selectPanel)
+    controlText.appendChild(selectPanel);
     controlUI.appendChild(controlText);
 
     // FOR DEMO
@@ -121,6 +122,8 @@ function CenterControl(controlDiv, map) {
                                         <button class="braquet-btn" id="sendemail">Email Report</button>\
                                     </div>\
                                   </div>\
+                                  <img id="loading_gif" src="/static/images/loading.gif" height="25" width="275" style="display:none;"/>\
+                                  <div id="email_success" style="color:#3c763d;display:none;">Email Report Sent!</div>\
                                   <div id="bidDisplay">\
                                         <div style="display:block; color:black; float:left;margin-right:10px; ">Top Bidder - </div>\
                                         <div id="bid1"></div>\
@@ -144,7 +147,9 @@ function CenterControl(controlDiv, map) {
                                     <div id="email">\
                                         <button class="braquet-btn" id="sendemail">Email Report</button>\
                                     </div>\
-                                  </div>'
+                                  </div>\
+                                  <img id="loading_gif" src="/static/images/loading.gif" height="25" width="275" style="display:none;"/>\
+                                  <div id="email_success" style="color:#3c763d;display:none;">Email Report Sent!</div>'
             }
     }
 
@@ -217,6 +222,8 @@ function sendEmailReportListener() {
 }
 
 function sendEmail(selected_polygon) {
+    // begin loading animation
+    $('#loading_gif').show();
     google.charts.setOnLoadCallback(drawChart);
 
     // http://stackoverflow.com/questions/24046778/html2canvas-does-not-work-with-google-maps-pan
@@ -230,6 +237,8 @@ function sendEmail(selected_polygon) {
         "left": mapleft,
         "top": maptop,
     })
+
+    // send email report after the canvas image generated has been rendered
     html2canvas(document.getElementById(MYLIBRARY.getMapId()),
     {
         useCORS: true,
@@ -253,8 +262,17 @@ function sendEmail(selected_polygon) {
                                        null, '\t'),
                 contentType: 'application/json; charset=UTF-8',
                 success: function (result) {
-                    if (result === "success")
+                    if (result === "success") {
                         console.log("success");
+                        // hide loading animation and show email success message
+                        $('#loading_gif').hide();
+                        $('#email_success').show();
+
+                        setTimeout(function () {
+                            $('#email_success').fadeOut();
+                        }, 7000);
+
+                    }
                     else
                         console.log(result);
                 }
@@ -286,10 +304,10 @@ function updateSystemListener() {
         }
         
         // remove previous panel layout
-        selected_polygon.pArray.setMap(null); 
+        selected_polygon.panelArray.setMap(null); 
     
         // generate a new panel layout
-        selected_polygon.updatePanelLayout();
+        panelLayout(selected_polygon);
     
         // obtain updated energy production data based on new panellayout
         getEnergyProduction(selected_polygon, function(data) {
@@ -308,7 +326,6 @@ function updateSystemListener() {
 function selectPolygon(polygon_object) {
     unselectAllPolygons();
     polygon_object.click_status = 1;
-    console.log(polygon_object.polygon);
     polygon_object.polygon.setOptions({fillColor: 'green',
                                        strokeColor: 'green'});
 
@@ -435,33 +452,28 @@ function mToCoordinates(solarWidth, latlngCenter){
 }
 
 function panelLayout(p) {
-    //azimuth - angle of panel from true North
-    //tilt - angle of panel from ground - not working properly for portrait..might be the difference between latitude/longitude conversion from meters
-    //rowSpace - space between rows 
-    //orientation - 'landscape' or 'portrait'
-    //moduleWattage - wattage of each panel
-
     var polygon = p.polygon;
     var coordinates = p.coordinates;
-    var azimuth = p.azimuth;
-    var orientation = p.orientation;
-    var rowSpace = p.rowSpace;
-    var tilt = p.tilt;
+    var azimuth = p.azimuthValue;
+    var orientation = p.orientationValue;
+    var rowSpace = p.rowSpaceValue;
+    var tilt = p.tiltValue;
     var moduleWattage = p.moduleWattage;
     var panelLength = p.panelLength;
-    var panelWdith = p.panelWdith;
-
+    var panelWidth = p.panelWidth;
     var latlngCenter = getPolygonCenter(coordinates);
-
+    
     //tilt multiplier to adjust how the panel would look tilted
     var tilt_coeff = Math.cos(tilt*Math.PI/180);
     //solar spec before tilt is considered
 
-    var m_solar_spec = {width: panelWdith, length: panelLength};
+    var m_solar_spec = {width: panelWidth, length: panelLength};
 
     var pre_solar_spec = {width: mToCoordinates(m_solar_spec.width, latlngCenter), 
                           length: mToCoordinates(m_solar_spec.length, latlngCenter)};
 
+    var lat;
+    var port;
     if(orientation == 'portrait'){
         azimuth += 180; //not 0 bc it takes into account for the off-set so there are no negative values
         port = 1;
@@ -500,6 +512,7 @@ function panelLayout(p) {
 
     var thetaOffSet = -(8 + azimuthOffSet) * (Math.PI/180);
 
+    var azimuthAngle;
     if(azimuth >= 0 && azimuth <= 90 || azimuth >= 181 && azimuth <= 270) {
         azimuthAngle = -(real_azimuthAngle + Math.PI/2);
         var theta = (90 - azimuthAngle - thetaOffSet);
@@ -610,7 +623,8 @@ function panelLayout(p) {
         }
     }
 
-    var panelArray = new google.maps.Polygon({ 
+    // set the new panel array
+    p.panelArray = new google.maps.Polygon({ 
         map: map,
         paths: solarSystemXY,
         strokeColor: 'grey',
@@ -621,16 +635,14 @@ function panelLayout(p) {
         zIndex: google.maps.Marker.MAX_ZINDEX
     });
 
-
     // update polygon panel array parameters here
     p.systemCapacity = moduleWattage * solarSystemXY.length/1000;
-    p.panelArray = panelArray;
     p.numPanels = solarSystemXY.length;
     p.latlngCenter = latlngCenter;
 }
 
 function setZoomOnPolygon(polygon_object) {
-    var bound = new google.maps.LatLngBounds();
+    var bound = new google.maps.LatLngBounds(null);
     for(var i=0; i<polygon_object.coordinates.length; i++) 
         bound.extend( new google.maps.LatLng(polygon_object.coordinates[i].lat(), 
             polygon_object.coordinates[i].lng()));
@@ -653,7 +665,7 @@ function Polygon(polygon) // polygon object
 
     this.polygon = polygon;
     this.coordinates = polygon.getPath().getArray();
-    this.azimuthValue = 120;
+    this.azimuthValue = Number(120);
     this.orientationValue = 'portrait';
     this.rowSpaceValue = 1.6;
     this.tiltValue = 30;
@@ -663,24 +675,20 @@ function Polygon(polygon) // polygon object
     this.systemCapacity = "loading...";
     this.latlngCenter = getPolygonCenter(this.coordinates); // updated in panelLayout()
     this.energyProduction = "loading...";
-    this.pArray = null;
-    this.pArrayListener = null;
+    this.panelArray = null;
+    this.panelArrayListener = null;
     this.numPanels = "loading...";
     this.panelType = null;
 
-    this.updatePanelLayout = panelLayout(this);
-
     this.updatePolygon = function () {
         this.coordinates = this.polygon.getPath().getArray();
-        this.pArray.setMap(null); 
+        this.panelArray.setMap(null); 
         
         // must remove old listener on previous panelArray
-        google.maps.event.removeListener(this.pArrayListener);
+        google.maps.event.removeListener(this.panelArrayListener);
 
         // obtain data from new panel layout
-        updatePanelLayout(this);
-
-        this.latlngCenter = getPolygonCenter(this.coordinates);
+        panelLayout(this);
 
         var p = this; // need to pass the scope into the callback function for getEnergyProduction()
         getEnergyProduction(p, function(data) {
@@ -689,7 +697,7 @@ function Polygon(polygon) // polygon object
         });
 
         // must add a new listener on the updated panel array
-        this.pArrayListener = google.maps.event.addListener(this.pArray, 'click', function () { 
+        this.panelArrayListener = google.maps.event.addListener(this.panelArray, 'click', function () { 
             selectPolygon(p); 
         });
     }
@@ -713,7 +721,7 @@ function initialize() {
     var search_input = document.getElementById('user_search');
     var autocomplete = new google.maps.places.Autocomplete(search_input);
     autocomplete.bindTo('bounds', map);
-    //map.controls[google.maps.ControlPosition.TOP_CENTER].push(search_input);
+
     // Get the full place details when the user selects a place from the
     // list of suggestions.
     var iw = new google.maps.InfoWindow();
@@ -768,7 +776,6 @@ function initialize() {
     
     draw.setMap(map);
 
-
     // event listener to obtain lat/lng coordinates from drawn polygon **************
     google.maps.event.addListener(draw, 'polygoncomplete', function (polygon) {
         // switch back to the hand option
@@ -802,7 +809,7 @@ function initialize() {
 
         // ***generate default panel layout independent of other listeners
         // requires lat() as lat/lng here are functions not keys in a dictionary
-        p.updatePanelLayout();
+        panelLayout(p);
 
         // get type of panel
         var panel_specs = document.getElementById('panel_specs');
@@ -812,6 +819,7 @@ function initialize() {
         // get energy production data and update panel display
         getEnergyProduction(p, function(data) {
             p.energyProduction = data;
+
             // update table with system info
             var project_stats = document.getElementById("projectStats")
             project_stats.innerHTML = "Nameplate Capacity: " + p.systemCapacity + "kW<br>";
@@ -824,7 +832,7 @@ function initialize() {
                 // select this polygon and unselect all others
                 selectPolygon(p);
             });
-            p.pArrayListener = google.maps.event.addListener(p.pArray, 'click', function () {
+            p.panelArrayListener = google.maps.event.addListener(p.panelArray, 'click', function () {
                 selectPolygon(p);
             });
         });

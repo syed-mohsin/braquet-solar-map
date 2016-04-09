@@ -113,8 +113,8 @@ def sendEmailReport():
 		panelType = str(request.json['panelType'])
 
 		# screenshot image location
-		img_loc = "/static/maps/rooftop_screenshot.png"
-		chart_loc = "/static/maps/production_chart.png"
+		img_loc = "static/maps/rooftop_screenshot.png"
+		chart_loc = "static/maps/production_chart.png"
 
 		# decode base64 png screenshot
 		fp1 = open(img_loc, "wb")
