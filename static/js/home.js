@@ -297,7 +297,7 @@ function updateSystemListener() {
 
         // check values are not null
         if (document.getElementById('azimuth').value != "")
-            selected_polygon.azimuthValue = document.getElementById('azimuth').value;
+            selected_polygon.azimuthValue = Number(document.getElementById('azimuth').value);
         if (document.getElementById('tilt').value != "")
             selected_polygon.tiltValue = document.getElementById('tilt').value;
         if (document.getElementById('rowSpace').value != "")
@@ -480,6 +480,8 @@ function panelLayout(p) {
     var panelLength = p.panelLength;
     var panelWidth = p.panelWidth;
     var latlngCenter = getPolygonCenter(coordinates);
+
+    console.log('Azimuth1: ' + azimuth)
     
     //tilt multiplier to adjust how the panel would look tilted
     var tilt_coeff = Math.cos(tilt*Math.PI/180);
@@ -521,10 +523,14 @@ function panelLayout(p) {
         azimuth -= 360;
     }
 
+    console.log('Azimuth before offset: ' + azimuth)
+
     //the panel dimension changes effects the azimuth and this variable is the offsetter for both maxGeo and azimuth
     var azimuthOffSet = (111.44889707494237 - angleSpread*180/Math.PI)/2;
 
     azimuth -= azimuthOffSet;
+
+    console.log('Azimuth after offset: ' + azimuth)
 
     var real_azimuthAngle = azimuth/180*Math.PI + 55.1/180*Math.PI; //63 degrees is when the two squars line up
 
@@ -704,7 +710,7 @@ function Polygon(polygon) // polygon object
 
     this.polygon = polygon;
     this.coordinates = polygon.getPath().getArray();
-    this.azimuthValue = Number(120);
+    this.azimuthValue = 120;
     this.orientationValue = 'portrait';
     this.rowSpaceValue = 1.6;
     this.tiltValue = 30;
