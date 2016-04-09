@@ -201,6 +201,11 @@ function sendEmailReportListener() {
     document.getElementById('sendemail').onmousedown = function(){
         console.log("email button clicked");
         var selected_polygon = getSelectedPolygon();
+
+        // there is no selected polygon
+        if (selected_polygon == null)
+            return;
+
         var current_bounds = map.getBounds();
         // zoom into polygon
         setZoomOnPolygon(selected_polygon);
@@ -283,8 +288,12 @@ function sendEmail(selected_polygon) {
 
 function updateSystemListener() {
     // listener for update button click
-    document.getElementById('update').onmousedown = function(){
+    document.getElementById('update').onmouseup = function(){
         var selected_polygon = getSelectedPolygon();
+
+        // there is no currently selected polygon
+        if (selected_polygon == null)
+            return;
 
         // check values are not null
         if (document.getElementById('azimuth').value != "")
@@ -314,7 +323,7 @@ function updateSystemListener() {
             // update energy production reading
             selected_polygon.energyProduction = data;
             // update table with system info
-            var project_stats = document.getElementById("projectStats")
+            var project_stats = document.getElementById("projectStats");
             project_stats.innerHTML = "Nameplate Capacity: " + selected_polygon.systemCapacity + "kW<br>";
             project_stats.innerHTML += "# of panels: " + selected_polygon.numPanels + "<br>";
             project_stats.innerHTML += "Energy Production: " + selected_polygon.energyProduction[2] + "kWh (monthly)<br>";
@@ -337,12 +346,21 @@ function selectPolygon(polygon_object) {
     project_stats.innerHTML += "Panel Type: " + polygon_object.panelType;
 }
 
+function deleteProjectStats() {
+    var project_stats = document.getElementById("projectStats");
+    project_stats.innerHTML = "Nameplate Capacity: " + "0" + "kW<br>";
+    project_stats.innerHTML += "# of panels: " + "0" + "<br>";
+    project_stats.innerHTML += "Energy Production: " + "0" + "kWh (monthly)<br>";
+    project_stats.innerHTML += "Panel Type: " + "NA";
+}
+
 function getSelectedPolygon() {
     var polygons = MYLIBRARY.getPolygons();
     for (i=0;i<polygons.length;i++) {
         if (polygons[i].click_status == 1)
             return polygons[i];
     }
+    return null;
 }
 
 function unselectAllPolygons() {
@@ -659,6 +677,27 @@ function getPolygonCenter(coordinates) {
     return bound.getCenter();
 }
 
+function createPolygonListButton() {
+    var p_list = document.getElementById('polygon_list');
+    var entry = document.createElement('div');
+    entry.className = "list-group-item";
+    var description = document.createElement('button');
+    description.className = "btn btn-xs btn-info";
+    description.innerHTML = "Rooftop #" + MYLIBRARY.getPolygons().length;
+    var delete_span = document.createElement('span');
+    delete_span.className = "pull-right";
+    var delete_btn = document.createElement('button');
+    delete_btn.className = "btn btn-xs btn-warning";
+    delete_btn.innerHTML = "&times";
+    delete_span.appendChild(delete_btn);
+    entry.appendChild(description);
+    entry.appendChild(delete_span);
+    p_list.appendChild(entry);
+
+    return { entry      : entry, 
+            delete_btn : delete_btn };
+}
+
 function Polygon(polygon) // polygon object
 {
     this.click_status = 0;
@@ -677,6 +716,7 @@ function Polygon(polygon) // polygon object
     this.energyProduction = "loading...";
     this.panelArray = null;
     this.panelArrayListener = null;
+    this.listeners = [];
     this.numPanels = "loading...";
     this.panelType = null;
 
@@ -724,15 +764,7 @@ function initialize() {
 
     // Get the full place details when the user selects a place from the
     // list of suggestions.
-    var iw = new google.maps.InfoWindow();
-    var m = new google.maps.Marker({
-        map: map
-    });
-    google.maps.event.addListener(m, 'click', function() {
-        iw.open(map, m);
-    });
     google.maps.event.addListener(autocomplete, 'place_changed', function() {
-        iw.close();
         var place = autocomplete.getPlace();
         if (!place.geometry) {
             return;
@@ -741,7 +773,7 @@ function initialize() {
             map.fitBounds(place.geometry.viewport);
         } else {
             map.setCenter(place.geometry.location);
-            map.setZoom(19);
+            map.setZoom(20);
         }
     })
     // position center control manager
@@ -789,17 +821,27 @@ function initialize() {
         // add to global list of polygons
         MYLIBRARY.addToPolygons(p);
 
-        // add a new polygon button to polygon_list
-        var p_list = document.getElementById('polygon_list');
-        var entry = document.createElement('button');
-        entry.className = "list-group-item";
-        entry.innerHTML = "Rooftop #" + MYLIBRARY.getPolygons().length;
-        p_list.appendChild(entry);
+        // add a new polygon btn (and delete btn) to polygon_list
+        var list_button_group = createPolygonListButton();
+        var entry = list_button_group.entry;
+        var delete_btn = list_button_group.delete_btn;
 
         // add a listener for polygon_list button
-        entry.onmousedown = function () {
+        entry.onmouseup = function () {
             selectPolygon(p);
         };
+
+        // add a listener to delete polygon and polygon button
+        delete_btn.onmouseup = function () {
+            console.log(document.getElementById("projectStats"))
+            deleteProjectStats();
+            p.panelArray.setMap(null);
+            p.polygon.setMap(null);
+            list_button_group.entry.parentNode.removeChild(entry);
+            MYLIBRARY.removePolygon(p);
+            
+            delete p;
+        } 
 
         // get array of vertices in lat/lng format of polygon
         var output = null;
@@ -811,7 +853,7 @@ function initialize() {
         // requires lat() as lat/lng here are functions not keys in a dictionary
         panelLayout(p);
 
-        // get type of panel
+        // get type of panel and store it
         var panel_specs = document.getElementById('panel_specs');
         var panelId = panel_specs.value;
         p.panelType = panel_specs[panelId].text;
@@ -821,7 +863,7 @@ function initialize() {
             p.energyProduction = data;
 
             // update table with system info
-            var project_stats = document.getElementById("projectStats")
+            var project_stats = document.getElementById("projectStats");
             project_stats.innerHTML = "Nameplate Capacity: " + p.systemCapacity + "kW<br>";
             project_stats.innerHTML += "# of panels: " + p.numPanels + "<br>";
             project_stats.innerHTML += "Energy Production: " + p.energyProduction[2] + "kWh (monthly)<br>";

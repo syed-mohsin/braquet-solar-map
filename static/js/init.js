@@ -37,6 +37,13 @@ var MYLIBRARY = MYLIBRARY || (function() {
 			_args["polygons"].push(polygon);
 			return 0;
 		},
+		removePolygon : function(polygon) {
+			if (_args["polygons"].length > 0) {
+				var index = _args["polygons"].indexOf(polygon);
+				if (index > -1)
+					_args["polygons"].splice(index, 1);
+			}
+		}
 
 	};
 }());
