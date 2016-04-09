@@ -25,6 +25,10 @@ input, select {
     width: 250px;
 }
 
+.navbar input{
+    margin-bottom: 0px;
+}
+
 #orientation {
     vertical-align: super;
 }
