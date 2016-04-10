@@ -71,7 +71,7 @@ function CenterControl(controlDiv, map) {
     controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
     controlUI.style.padding = '10px';
     controlUI.style.textAlign = 'left';
-    controlUI.innerHTML = '<a><h5>Project Settings<span class="caret" style="margin-left:5px;"></span></h5></a>';
+    controlUI.innerHTML = '<a data-toggle="collapse" href="#collapse1"><h5>Project Settings<span class="caret" style="margin-left:5px;"></span></h5></a>';
     controlDiv.appendChild(controlUI);
 
     var selectPanel = document.createElement('select');
@@ -95,6 +95,8 @@ function CenterControl(controlDiv, map) {
 
     // Set CSS for the control interior.
     var controlText = document.createElement('div');
+    controlText.id = 'collapse1';
+    controlText.className = 'panel-collapse collapse in';
     controlText.style.color = 'rgb(25,25,25)';
     controlText.style.fontSize = '11px';
     controlText.style.lineHeight = '10px';
@@ -326,7 +328,7 @@ function updateSystemListener() {
             var project_stats = document.getElementById("projectStats");
             project_stats.innerHTML = "Nameplate Capacity: " + selected_polygon.systemCapacity + "kW<br>";
             project_stats.innerHTML += "# of panels: " + selected_polygon.numPanels + "<br>";
-            project_stats.innerHTML += "Energy Production: " + selected_polygon.energyProduction[2] + "kWh (monthly)<br>";
+            project_stats.innerHTML += "Energy Production: " + Math.round(selected_polygon.energyProduction[2], 0) + "kWh (monthly)<br>";
             project_stats.innerHTML += "Panel Type: " + selected_polygon.panelType;
         });   
     };
@@ -342,7 +344,7 @@ function selectPolygon(polygon_object) {
     var project_stats = document.getElementById("projectStats");
     project_stats.innerHTML = "Nameplate Capacity: " + polygon_object.systemCapacity + "kW<br>";
     project_stats.innerHTML += "# of panels: " + polygon_object.numPanels + "<br>";
-    project_stats.innerHTML += "Energy Production: " + polygon_object.energyProduction[2] + "kWh (monthly)<br>";
+    project_stats.innerHTML += "Energy Production: " + Math.round(polygon_object.energyProduction[2], 0) + "kWh (monthly)<br>";
     project_stats.innerHTML += "Panel Type: " + polygon_object.panelType;
 }
 
@@ -872,7 +874,7 @@ function initialize() {
             var project_stats = document.getElementById("projectStats");
             project_stats.innerHTML = "Nameplate Capacity: " + p.systemCapacity + "kW<br>";
             project_stats.innerHTML += "# of panels: " + p.numPanels + "<br>";
-            project_stats.innerHTML += "Energy Production: " + p.energyProduction[2] + "kWh (monthly)<br>";
+            project_stats.innerHTML += "Energy Production: " + Math.round(p.energyProduction[2],0) + "kWh (monthly)<br>";
             project_stats.innerHTML += "Panel Type: " + p.panelType;
 
             // listener for click on polygon
