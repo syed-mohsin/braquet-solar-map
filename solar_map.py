@@ -28,6 +28,8 @@ app.config.from_object(__name__)
 app.config['SECRET_KEY'] = credentials.STORMPATH_SECRET_KEY
 app.config['STORMPATH_API_KEY_FILE'] = credentials.STORMPATH_API_KEY_FILE
 app.config['STORMPATH_APPLICATION'] = credentials.STORMPATH_APPLICATION
+app.config['STORMPATH_REGISTRATION_TEMPLATE'] = 'registration.html'
+app.config['STORMPATH_LOGIN_TEMPLATE'] = 'login.html'
 
 # clients connected to app
 mail = Mail(app)
