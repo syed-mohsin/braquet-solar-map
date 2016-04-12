@@ -1072,4 +1072,15 @@ $(document).ready(function() {
             el.dispatchEvent(evObj);
         }
     }
+
+    function iframeModal(url, placement){
+        var placementEl = placement;
+        var iframe = document.createElement('iframe');
+        iframe.src = url;
+        placementEl.appendChild(iframe);
+    }
+
+    iframeModal('http://www.braquet.io/login', document.getElementById('login').children[0].children[0].children[0])
+    iframeModal('http://www.braquet.io/register', document.getElementById('signup').children[0].children[0].children[0])
+
 });
