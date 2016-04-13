@@ -86,10 +86,11 @@
       </ul>
 {% if user_data['logged_in'] %}
       <ul class="nav navbar-nav navbar-right">
-        <button class="btn btn-default dropdown-toggle" type="button" id="logged_in_button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        <div style="color:white;" class="dropdown-toggle" id="logged_in_button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        <img class="img-circle" src="/static/images/avatar.png">
         {{user_data['name']}}
         <span class="caret"></span>
-        </button>
+        </div>
         <ul class="dropdown-menu" aria-labelledby="logged_in_button">
           <li><a href="#login" data-toggle="modal" data-target="#settings">{{user_data['email']}}</a></li>
           <li><a href="/logout">Logout</a></li>
