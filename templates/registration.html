@@ -1,0 +1,48 @@
+<form method="post">
+  {{ form.hidden_tag() }}
+
+  {# This bit of code displays a list of error messages if anything bad happens. #}
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  {# This block of code renders the desired input boxes for registering users.  #}
+  {% if config['STORMPATH_ENABLE_USERNAME'] %}
+    {% if config['STORMPATH_REQUIRE_USERNAME'] %}
+      {{ form.username(placeholder='Username', required='true') }}
+    {% else %}
+      {{ form.username(placeholder='Username') }}
+    {% endif %}
+  {% endif %}
+  {% if config['STORMPATH_ENABLE_GIVEN_NAME'] %}
+    {% if config['STORMPATH_REQUIRE_GIVEN_NAME'] %}
+      {{ form.given_name(placeholder='First Name', required='true') }}
+    {% else %}
+      {{ form.given_name(placeholder='First Name') }}
+    {% endif %}
+  {% endif %}
+  {% if config['STORMPATH_ENABLE_MIDDLE_NAME'] %}
+    {% if config['STORMPATH_REQUIRE_MIDDLE_NAME'] %}
+      {{ form.middle_name(placeholder='Middle Name', required='true') }}
+    {% else %}
+      {{ form.middle_name(placeholder='Middle Name') }}
+    {% endif %}
+  {% endif %}
+  {% if config['STORMPATH_ENABLE_SURNAME'] %}
+    {% if config['STORMPATH_REQUIRE_SURNAME'] %}
+      {{ form.surname(placeholder='Last Name', required='true') }}
+    {% else %}
+      {{ form.surname(placeholder='Last Name') }}
+    {% endif %}
+  {% endif %}
+  {{ form.email(placeholder='Email', required='true', type='email') }}
+  {{ form.password(placeholder='Password', required='true', type='password') }}
+
+  <button type="submit">Create Account</button>
+</form>

@@ -6,6 +6,9 @@ var MYLIBRARY = MYLIBRARY || (function() {
 			_args = Args;
 			// some other initializing if necessary
 		},
+		getUser : function() {
+			return _args["user"];
+		},
 		getMapId      : function() {
 			return _args["map_id"];
 		},
@@ -43,7 +46,6 @@ var MYLIBRARY = MYLIBRARY || (function() {
 				if (index > -1)
 					_args["polygons"].splice(index, 1);
 			}
-		}
-
+		},
 	};
 }());

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response, json, jsonify, send_file
+from flask import Flask, render_template, request, Response, json, jsonify, send_file, redirect, url_for
 from flask.ext.stormpath import StormpathManager, login_required, groups_required, user
 from flask_mail import Mail
 from flask_mail import Message
@@ -30,6 +30,8 @@ app.config['STORMPATH_API_KEY_FILE'] = credentials.STORMPATH_API_KEY_FILE
 app.config['STORMPATH_APPLICATION'] = credentials.STORMPATH_APPLICATION
 app.config['STORMPATH_REGISTRATION_TEMPLATE'] = 'registration.html'
 app.config['STORMPATH_LOGIN_TEMPLATE'] = 'login.html'
+app.config['STORMPATH_REDIRECT_URL'] = '/dashboard'
+app.config['STORMPATH_REGISTRATION_REDIRECT_URL'] = '/dashboard'
 
 # clients connected to app
 mail = Mail(app)
@@ -38,12 +40,17 @@ mongo = credentials.connect()
 google_places = GooglePlaces(credentials.API_KEY)
 geolocator = Nominatim()
 
-@app.route("/", methods=["GET", "POST"])
-@app.route("/index", methods=["GET", "POST"])
-@app.route("/demo", methods=["GET", "POST"])
-def mapview():
+@app.route("/demo", methods=["GET"])
+@app.route("/index", methods=["GET"])
+@app.route("/", methods=["GET"])
+def freemapview():
+	if user.is_authenticated():
+		return redirect(url_for("dashboard"))
+
 	rule = request.url_rule
 	is_demo = False
+	user_data = {'logged_in' : False}
+	
 	if 'demo' in rule.rule:
 		is_demo = True
 
@@ -57,28 +64,34 @@ def mapview():
 		markers=[],
 		style="height:600px;width:1000px;margin:0;"
 	)
-	locations = None
 
-	# place markers on map corresponding to retrieved business results
-	if request.method == "POST":
-		query = google_places.nearby_search(location=request.form["user_search"], radius=100)
-		markers = [(place.geo_location['lat'], place.geo_location['lng']) for place in query.places]
+	return render_template('home.html', mymap=mymap, logo=logo, is_demo=is_demo, 
+						   user_data=user_data)
 
-		roof_borders = []
+@app.route("/dashboard", methods=["GET"])	
+def dashboard():
+	user_data = {}
+	if user.is_authenticated():
+		print "USERNAME*******************************" + user.given_name
+		user_data['logged_in'] = True
+		user_data['name'] = user.given_name
+		user_data['email'] = user.email
+	else:
+		return redirect(url_for('freemapview'))
 
-		mymap = Map(
-			identifier="view-side",
-			maptype='SATELLITE',
-			lat=query.places[0].geo_location['lat'],
-			lng=query.places[0].geo_location['lng'],
-			infobox=["<img src='./static/chicken.jpg' height=100 width=100>"]*len(query.places),
-			markers=markers,
-			roof_borders=roof_borders,
-			style="height:600px;width:1000px;margin:0;",
-			zoom=20
-		)
+	logo = "Braquet | Layout"
+	
+	# create a map in view
+	mymap = Map(
+		identifier="view-side",
+		lat=37.7918,
+		lng=-122.4266,
+		markers=[],
+		style="height:600px;width:1000px;margin:0;"
+	)
 
-	return render_template('home.html', mymap=mymap, locations=locations, logo=logo, is_demo=is_demo)
+	return render_template('home.html', mymap=mymap, logo=logo, is_demo=False, 
+						   user_data=user_data)
 
 @app.route("/nrel", methods=["POST"])
 def nrel():

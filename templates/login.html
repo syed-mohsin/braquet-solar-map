@@ -1,0 +1,33 @@
+{# Display errors (if there are any). #}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+{# Render the login form. #}
+<form method="post">
+  {{ form.hidden_tag() }}
+  {% if config['STORMPATH_ENABLE_USERNAME'] %}
+    {{ form.login(placeholder='Username or Email', required='true') }}
+  {% else %}
+    {{ form.login(placeholder='Email', required='true') }}
+  {% endif %}
+  {{ form.password(placeholder='Password', required='true') }}
+  <button type="submit">Log In</button>
+</form>
+
+{# If social login is enabled, display social login buttons. #}
+{% if config['STORMPATH_ENABLE_FACEBOOK'] or config['STORMPATH_ENABLE_GOOGLE'] %}
+  <p>Or, log in using a social provider.</p>
+  {% if config['STORMPATH_ENABLE_FACEBOOK'] %}
+    {% include "flask_stormpath/facebook_login_form.html" %}
+  {% endif %}
+  {% if config['STORMPATH_ENABLE_GOOGLE'] %}
+    {% include "flask_stormpath/google_login_form.html" %}
+  {% endif %}
+{% endif %}

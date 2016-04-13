@@ -22,9 +22,11 @@
                         "map"          : null,
                         "polygons"     : [],
                         "chart_base64" : null,
+                        "user"         : {{user_data['logged_in']|tojson}}
                       });
       </script>
       <script src="/static/js/home.js" type="text/javascript"></script>
+      <script src="/static/js/mapui.js" type="text/javascript"></script>
     </head>
     <body>
 
@@ -82,17 +84,48 @@
       <ul class="nav navbar-nav">
         <li class="active"><a href="#"><input id="user_search" class="controls" placeholder="Search for a region" name="user_search" required/></a></li>
       </ul>
+{% if user_data['logged_in'] %}
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#login" data-toggle="modal" data-target="#signup">Sign Up</a></li>
+        <button class="btn btn-default dropdown-toggle" type="button" id="logged_in_button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        {{user_data['name']}}
+        <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="logged_in_button">
+          <li><a href="#login" data-toggle="modal" data-target="#settings">{{user_data['email']}}</a></li>
+          <li><a href="/logout">Logout</a></li>
+        </ul>
+      </ul>
+{% else %}
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#signup" data-toggle="modal" data-target="#signup">Sign Up</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><a href="#login" data-toggle="modal" data-target="#login">Sign In</a></li>
       </ul>
+{% endif %}
     </div><!--/.nav-collapse -->
   </div>
 
 </div>
+
+{% if user_data['logged_in'] %}
     <!-- Modal -->
+    <div class="modal fade" id="settings" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+      
+        <div class="modal-body">
+          {{user_data['email']}}
+        </div>
+       
+      </div>
+      
+    </div>
+  </div>
+
+{% else %}
   <div class="modal fade" id="login" role="dialog">
     <div class="modal-dialog">
     
@@ -121,6 +154,7 @@
       
     </div>
   </div>
+{% endif %}
         <div id="{{mymap.identifier}}" class="{{mymap.cls}}"></div>       
     </body>
 </html>
