@@ -525,14 +525,14 @@ function panelLayout(p) {
         azimuth -= 360;
     }
 
-    console.log('Azimuth before offset: ' + azimuth)
+    console.log('Azimuth before offset: ' + azimuth);
 
     //the panel dimension changes effects the azimuth and this variable is the offsetter for both maxGeo and azimuth
     var azimuthOffSet = (111.44889707494237 - angleSpread*180/Math.PI)/2;
 
     azimuth -= azimuthOffSet;
 
-    console.log('Azimuth after offset: ' + azimuth)
+    console.log('Azimuth after offset: ' + azimuth);
 
     var real_azimuthAngle = azimuth/180*Math.PI + 55.1/180*Math.PI; //63 degrees is when the two squars line up
 
@@ -570,7 +570,6 @@ function panelLayout(p) {
     for(i=0; i<maxGeo.length; i++){
         maxGeoXY.push(latLngToPoint(maxGeo[i]));
     }
-    
 
     //Determines the starting point of the panel layout depending on the azimuth
     if(azimuth >= 0 && azimuth <= 90){
@@ -759,11 +758,22 @@ function initialize() {
     map = new google.maps.Map(
     document.getElementById(MYLIBRARY.getMapId()), {
         center: new google.maps.LatLng(37.7918, -122.4266),
-        zoom: 22,
+        zoom: 21,
+        tilt: 0,
         mapTypeId: google.maps.MapTypeId.SATELLITE
     });
 
-    map.setTilt(0);
+    // Try HTML5 geolocation
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+            var pos = {
+                lat : position.coords.latitude,
+                lng : position.coords.longitude
+            };
+            // set map centered on current location
+            map.setCenter(pos);
+        });
+    }
 
     // position search bar and enable autocomplete
     var search_input = document.getElementById('user_search');
@@ -781,7 +791,7 @@ function initialize() {
             map.fitBounds(place.geometry.viewport);
         } else {
             map.setCenter(place.geometry.location);
-            map.setZoom(22);
+            map.setZoom(21);
         }
     })
     // position center control manager
