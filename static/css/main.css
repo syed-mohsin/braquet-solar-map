@@ -25,8 +25,23 @@ input, select {
     width: 250px;
 }
 
+#logged_in_button {
+  padding: 14px 30px;
+  cursor: pointer;
+}
+
+#logged_in_button img{
+  width:28px;
+  margin-right: 5px;
+}
+
 .navbar input{
     margin-bottom: 0px;
+}
+
+
+.navbar .caret{
+  border-top-color:white;
 }
 
 #orientation {
