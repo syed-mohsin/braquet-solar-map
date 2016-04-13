@@ -10,7 +10,7 @@
 {% endwith %}
 
 {# Render the login form. #}
-<form method="post">
+<form method="post" action="/login">
   {{ form.hidden_tag() }}
   {% if config['STORMPATH_ENABLE_USERNAME'] %}
     {{ form.login(placeholder='Username or Email', required='true') }}

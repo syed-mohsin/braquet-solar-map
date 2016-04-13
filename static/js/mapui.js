@@ -154,7 +154,21 @@ $(document).ready(function() {
     }
 
     if (!MYLIBRARY.getUser()) {
-        iframeModal('/login', document.getElementById('login').children[0].children[0].children[0]);
-        iframeModal('/register', document.getElementById('signup').children[0].children[0].children[0]);
+        $.ajax({
+            type : "GET",
+            url  : "/login",
+            success: function (data) {
+                document.getElementById('login_data').innerHTML = data;
+            }
+        });
+        $.ajax({
+            type : "GET",
+            url  : "/register",
+            success: function (data) {
+                document.getElementById('signup_data').innerHTML = data;
+            }
+        });
+        // iframeModal('/login', document.getElementById('login').children[0].children[0].children[0]);
+        // iframeModal('/register', document.getElementById('signup').children[0].children[0].children[0]);
     }
 });

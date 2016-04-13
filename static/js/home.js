@@ -759,7 +759,7 @@ function initialize() {
     map = new google.maps.Map(
     document.getElementById(MYLIBRARY.getMapId()), {
         center: new google.maps.LatLng(37.7918, -122.4266),
-        zoom: 20,
+        zoom: 100,
         mapTypeId: google.maps.MapTypeId.SATELLITE
     });
 
