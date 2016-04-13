@@ -146,6 +146,10 @@ function CenterControl(controlDiv, map) {
                                     <div id="submit">\
                                         <button class="braquet-btn" id="update" style="width:100%">Update</button>\
                                     </div>\
+                                    <div id="polygon">\
+                                        <button class="braquet-btn" id="draw" style="width:49%; float:left;">Draw</button>\
+                                        <button class="braquet-btn" id="keepout" style="width:49%">Keepout</button>\
+                                    </div>\
                                     <div id="email">\
                                         <button class="braquet-btn" id="sendemail">Email Report</button>\
                                     </div>\

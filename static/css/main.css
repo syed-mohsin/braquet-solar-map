@@ -51,6 +51,7 @@ input, select {
 #submit button {
   float: left;
   margin-right: 8px;
+  margin-bottom: 10px;
 }
 
 #email button {
