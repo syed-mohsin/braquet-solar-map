@@ -47,5 +47,14 @@ var MYLIBRARY = MYLIBRARY || (function() {
 					_args["polygons"].splice(index, 1);
 			}
 		},
+		setDrawingModeDraw : function() {
+			_args['draw_mode'] = 0;
+		},
+		setDrawingModeKeepout : function() {
+			_args['draw_mode'] = 1;
+		},
+		getDrawingMode : function() {
+			return _args['draw_mode'];
+		}
 	};
 }());

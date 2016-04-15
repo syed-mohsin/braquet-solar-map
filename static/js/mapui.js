@@ -154,21 +154,11 @@ $(document).ready(function() {
     }
 
     if (!MYLIBRARY.getUser()) {
-        $.ajax({
-            type : "GET",
-            url  : "/login",
-            success: function (data) {
-                document.getElementById('login_data').innerHTML = data;
-            }
-        });
-        $.ajax({
-            type : "GET",
-            url  : "/register",
-            success: function (data) {
-                document.getElementById('signup_data').innerHTML = data;
-            }
-        });
-        // iframeModal('/login', document.getElementById('login').children[0].children[0].children[0]);
-        // iframeModal('/register', document.getElementById('signup').children[0].children[0].children[0]);
+        // fetch login page
+        // $("#login_data").load("/login");
+        // fetch registration page
+        // $("#signup_data").load("/register");
+        iframeModal('/login', document.getElementById('modal_login').children[0].children[0].children[0]);
+        iframeModal('/register', document.getElementById('modal_signup').children[0].children[0].children[0]);
     }
 });

@@ -98,10 +98,10 @@
       </ul>
 {% else %}
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#signup" data-toggle="modal" data-target="#signup">Sign Up</a></li>
+        <li><a href="#signup" data-toggle="modal" data-target="#modal_signup">Sign Up</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#login" data-toggle="modal" data-target="#login">Sign In</a></li>
+        <li><a href="#login" data-toggle="modal" data-target="#modal_login">Sign In</a></li>
       </ul>
 {% endif %}
     </div><!--/.nav-collapse -->
@@ -127,7 +127,7 @@
   </div>
 
 {% else %}
-  <div class="modal fade" id="login" role="dialog">
+  <div class="modal fade" id="modal_login" role="dialog">
     <div class="modal-dialog">
     
       <!-- Modal content-->
@@ -141,7 +141,7 @@
       
     </div>
   </div>
-    <div class="modal fade" id="signup" role="dialog">
+    <div class="modal fade" id="modal_signup" role="dialog">
     <div class="modal-dialog">
     
       <!-- Modal content-->

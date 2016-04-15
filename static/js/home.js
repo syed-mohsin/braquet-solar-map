@@ -292,6 +292,40 @@ function sendEmail(selected_polygon) {
     });
 }
 
+function drawButtonListener(draw) {
+    console.log(document.getElementById('draw'))
+    // create click listener for draw
+    google.maps.event.addDomListener(document.getElementById('draw'), 'click', function() {
+        draw.setOptions({
+            drawingMode: google.maps.drawing.OverlayType.POLYGON,
+            polygonOptions: {
+            fillColor: 'yellow',
+            strokeColor: 'yellow',
+            editable: true,
+            draggable: false
+            }
+        });
+    });
+}
+
+function keepoutButtonListener(draw) {
+    // create click listener for keepouts
+    google.maps.event.addDomListener(document.getElementById('keepout'), 'click', function() {
+        // set drawing mode to keepout
+        MYLIBRARY.setDrawingModeKeepout();
+        // create red keepout box
+        draw.setOptions({
+            drawingMode: google.maps.drawing.OverlayType.POLYGON,
+            polygonOptions: {
+            fillColor: 'red',
+            strokeColor: 'red',
+            editable: false,
+            draggable: false
+            }
+        });
+    });
+}
+
 function updateSystemListener() {
     // listener for update button click
     document.getElementById('update').onmouseup = function(){
@@ -813,7 +847,7 @@ function initialize() {
     // drawing manager
     var draw = new google.maps.drawing.DrawingManager({
         drawingMode: null,
-        drawingControl: true,
+        drawingControl: false,
         drawingControlOptions: {
           position: google.maps.ControlPosition.TOP_CENTER,
           drawingModes: [
@@ -830,12 +864,22 @@ function initialize() {
     
     draw.setMap(map);
 
+    google.maps.event.addListener(map, 'idle', function() {
+        // create listener for draw button
+        drawButtonListener(draw);
+        MYLIBRARY.setDrawingModeDraw();
+    });
+
     // event listener to obtain lat/lng coordinates from drawn polygon **************
     google.maps.event.addListener(draw, 'polygoncomplete', function (polygon) {
         // switch back to the hand option
         draw.setOptions({
             drawingMode: null
         });
+
+        //******DETERMINE IF KEEPOUT*******
+        if (MYLIBRARY.getDrawingMode())
+            return;
 
         // create polygon object
         var p = new Polygon(polygon);
@@ -936,7 +980,10 @@ function initialize() {
         // update array upon parameter changes in control box
         updateSystemListener();
 
+        // create listener for keepouts
+        keepoutButtonListener(draw);
+
         // listener for sending an email report
         sendEmailReportListener();
-    });    
+    });  
 }

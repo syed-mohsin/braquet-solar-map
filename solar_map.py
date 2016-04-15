@@ -1,5 +1,8 @@
-from flask import Flask, render_template, request, Response, json, jsonify, send_file, redirect, url_for
-from flask.ext.stormpath import StormpathManager, login_required, groups_required, user
+from flask import Flask, flash, render_template, request, Response, json, jsonify, send_file, redirect, url_for
+from flask.ext.stormpath import StormpathManager, login_required, groups_required, user, login_user, StormpathError
+from flask.ext.login import _get_user
+from flask.ext.stormpath.forms import LoginForm, RegistrationForm
+from flask.ext.stormpath.models import User
 from flask_mail import Mail
 from flask_mail import Message
 from pymongo import MongoClient
@@ -32,6 +35,8 @@ app.config['STORMPATH_REGISTRATION_TEMPLATE'] = 'registration.html'
 app.config['STORMPATH_LOGIN_TEMPLATE'] = 'login.html'
 app.config['STORMPATH_REDIRECT_URL'] = '/dashboard'
 app.config['STORMPATH_REGISTRATION_REDIRECT_URL'] = '/dashboard'
+app.config['STORMPATH_ENABLE_LOGIN'] = False
+app.config['STORMPATH_ENABLE_REGISTRATION'] = False
 
 # clients connected to app
 mail = Mail(app)
@@ -68,11 +73,10 @@ def freemapview():
 	return render_template('home.html', mymap=mymap, logo=logo, is_demo=is_demo, 
 						   user_data=user_data)
 
-@app.route("/dashboard", methods=["GET"])	
+@app.route("/dashboard", methods=["GET"])
 def dashboard():
 	user_data = {}
 	if user.is_authenticated():
-		print "USERNAME*******************************" + user.given_name
 		user_data['logged_in'] = True
 		user_data['name'] = user.given_name
 		user_data['email'] = user.email
@@ -158,15 +162,112 @@ def sendEmailReport():
 	else:
 		return "404 ERROR"
 
-@app.route("/get_screenshot")
-def getScreenshot():
-	filename = "static/maps/rooftop_screenshot.png"
-	return send_file(filename, mimetype='image/png')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """
+    This view logs in a user given an email address and password.
+    This works by querying Stormpath with the user's credentials, and either
+    getting back the User object itself, or an exception (in which case well
+    tell the user their credentials are invalid).
+    If the user is valid, we'll log them in, and store their session for later.
+    """
+    form = LoginForm()
 
-@app.route("/get_chart")
-def getChart():
-	filename = "static/maps/production_chart.png"
-	return send_file(filename, mimetype='image/png')
+    if request.method == 'GET':
+        return render_template('login.html', form=form)
+
+    if request.method == 'POST':
+	    try:
+	        _user = User.from_login(
+	            request.form.get('login'),
+	            request.form.get('password')
+	        )
+	    except StormpathError, err:
+	    	flash(err.message.get('message'))
+	        return render_template('login.html', form=form)
+
+	    login_user(_user, remember=True)
+	    return render_template('login.html', form=form, success=True)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+	"""
+	Register a new user with Stormpath.
+	This view will render a registration template, and attempt to create a new
+	user account with Stormpath.
+	The fields that are asked for, the URL this view is bound to, and the
+	template that is used to render this page can all be controlled via
+	Flask-Stormpath settings.
+	"""
+	form = RegistrationForm()
+
+	if request.method == 'GET':
+		return render_template(
+			app.config['STORMPATH_REGISTRATION_TEMPLATE'],
+			form = form
+		)
+
+	if request.method == 'POST':
+		# If we received a POST request with valid information, we'll continue
+	    # processing.
+	    if form.validate_on_submit():
+	        fail = False
+
+	        # Iterate through all fields, grabbing the necessary form data and
+	        # flashing error messages if required.
+	        data = form.data
+	        for field in data.keys():
+	            if app.config['STORMPATH_ENABLE_%s' % field.upper()]:
+	                if app.config['STORMPATH_REQUIRE_%s' % field.upper()] and not data[field]:
+	                    fail = True
+
+	                    # Manually override the terms for first / last name to make
+	                    # errors more user friendly.
+	                    if field == 'given_name':
+	                        field = 'first name'
+
+	                    elif field == 'surname':
+	                        field = 'last name'
+
+	                    flash('%s is required.' % field.replace('_', ' ').title())
+
+	        # If there are no missing fields (per our settings), continue.
+	        if not fail:
+
+	            # Attempt to create the user's account on Stormpath.
+	            try:
+
+					# Since Stormpath requires both the given_name and surname
+					# fields be set, we'll just set the both to 'Anonymous' if
+					# the user has # explicitly said they don't want to collect
+					# those fields.
+					data['given_name'] = data['given_name'] or 'Anonymous'
+					data['surname'] = data['surname'] or 'Anonymous'
+
+					# Create the user account on Stormpath.  If this fails, an
+					# exception will be raised.
+					account = User.create(**data)
+
+					# If we're able to successfully create the user's account,
+					# we'll log the user in (creating a secure session using
+					# Flask-Login), then redirect the user to the
+					# STORMPATH_REDIRECT_URL setting.
+					login_user(account, remember=True)
+
+					return render_template(
+						app.config['STORMPATH_REGISTRATION_TEMPLATE'],
+						form = form,
+						success = True
+					)
+
+	            except StormpathError as err:
+	                flash(err.message.get('message'))
+
+		    return render_template(
+		        app.config['STORMPATH_REGISTRATION_TEMPLATE'],
+		        form = form,
+		    )
+
 
 if __name__ == "__main__":
 	app.run(debug=True)

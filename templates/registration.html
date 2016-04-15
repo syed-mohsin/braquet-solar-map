@@ -1,3 +1,7 @@
+{% if success %}
+  <base target="_parent" />
+  <script>window.top.location.href = "/dashboard";</script>
+{% else %}
 <form method="post" action="/register">
   {{ form.hidden_tag() }}
 
@@ -46,3 +50,4 @@
 
   <button type="submit">Create Account</button>
 </form>
+{% endif %}
