@@ -315,6 +315,8 @@ function drawButtonListener(draw) {
 function keepoutButtonListener(draw) {
     // create click listener for keepouts
     google.maps.event.addDomListener(document.getElementById('keepout'), 'click', function() {
+        if (getSelectedPolygon() == null)
+            return;
         // set drawing mode to keepout
         MYLIBRARY.setDrawingModeKeepout();
         // first clear current drawing mode
@@ -732,6 +734,9 @@ function panelLayout(p) {
 
 function addKeepout(keepout_polygon) {
     var selected_polygon = getSelectedPolygon();
+    if (selected_polygon == null)
+        return;
+
     var main_polygon = selected_polygon.polygon;
 
     // add keepout polygon to main polygon object
@@ -760,14 +765,14 @@ function addKeepout(keepout_polygon) {
         for (var j=0; j<panel.getLength(); j++) {
             var xy = panel.getAt(j);
             if (google.maps.geometry.poly.containsLocation(xy, keepout_polygon)) {
-                console.log(true);
                 panels.removeAt(i);
                 i--; // having removed a panel, we must remain at the same index
                 break;
             }
         }
     }
-    selected_polygon.panelArray.setPaths(panels);
+    // set the new panel layout
+    selected_polygon.updatePolygon();
 }
 
 function setZoomOnPolygon(polygon_object) {
@@ -973,6 +978,8 @@ function initialize() {
             deleteProjectStats();
             p.panelArray.setMap(null);
             p.polygon.setMap(null);
+            for (var i=0; i<p.keepouts.length;i++)
+                p.keepouts[i].setMap(null);
             list_button_group.entry.parentNode.removeChild(entry);
             MYLIBRARY.removePolygon(p);
             
