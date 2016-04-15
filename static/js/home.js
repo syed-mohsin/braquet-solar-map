@@ -293,9 +293,13 @@ function sendEmail(selected_polygon) {
 }
 
 function drawButtonListener(draw) {
-    console.log(document.getElementById('draw'))
     // create click listener for draw
     google.maps.event.addDomListener(document.getElementById('draw'), 'click', function() {
+        // set drawing mode to draw
+        MYLIBRARY.setDrawingModeDraw();
+        // first clear current drawing mode
+        draw.setDrawingMode(null);
+        // set drawing type of draw
         draw.setOptions({
             drawingMode: google.maps.drawing.OverlayType.POLYGON,
             polygonOptions: {
@@ -313,13 +317,15 @@ function keepoutButtonListener(draw) {
     google.maps.event.addDomListener(document.getElementById('keepout'), 'click', function() {
         // set drawing mode to keepout
         MYLIBRARY.setDrawingModeKeepout();
-        // create red keepout box
+        // first clear current drawing mode
+        draw.setDrawingMode(null);
+        // set drawing type for keepout
         draw.setOptions({
             drawingMode: google.maps.drawing.OverlayType.POLYGON,
             polygonOptions: {
             fillColor: 'red',
             strokeColor: 'red',
-            editable: false,
+            editable: true,
             draggable: false
             }
         });
@@ -471,6 +477,22 @@ function containsPolygon(points_array, polygon) {
         }
     }
     return true;
+}
+
+// check if any collection of points are located in any keepouts
+function containedInKeepout(points_array, keepouts) {
+    for (var j=0;j<keepouts.length; j++) {
+        var keepout = keepouts[j];
+        // check if any of the four panel points lie within the current keepout
+        for (var i=0; i<points_array.length; i++) {
+            var point = new google.maps.LatLng(points_array[i].lat, points_array[i].lng);
+            var roof_check = google.maps.geometry.poly.containsLocation(point, keepout);
+            if (roof_check === true) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 function latLngToPoint(latLng) {
@@ -649,7 +671,7 @@ function panelLayout(p) {
                 y: centerPanelCoordXY.y + radius * Math.cos(azimuthAngle)
                 
             },
-           {   // min lat, min lng ==> bottom left of panel
+            {   // min lat, min lng ==> bottom left of panel
                 x: centerPanelCoordXY.x + radius * Math.sin(azimuthAngle + angleSpread),
                 y: centerPanelCoordXY.y + radius * Math.cos(azimuthAngle + angleSpread)
                 
@@ -675,8 +697,12 @@ function panelLayout(p) {
             if (containsPolygon(pv_corner_arrayXY, polygon) === false) {
                 continue;
             }
+
+            // check if any corners are within our collection of keepout regions
+            if (containedInKeepout(pv_corner_arrayXY, p.keepouts))
+                continue;
+
             //add panel to panel array
-            
             for (m = 0; m < pv_corner_arrayXY.length; m++) {
                 panelCoordsXY.push(pv_corner_arrayXY[m]);
             }
@@ -704,20 +730,60 @@ function panelLayout(p) {
     p.latlngCenter = latlngCenter;
 }
 
+function addKeepout(keepout_polygon) {
+    var selected_polygon = getSelectedPolygon();
+    var main_polygon = selected_polygon.polygon;
+
+    // add keepout polygon to main polygon object
+    selected_polygon.keepouts.push(keepout_polygon);
+
+    // create listener to update keepout if boundaries change
+    google.maps.event.addListener(keepout_polygon.getPath(), "set_at", function() {
+        selectPolygon(selected_polygon);
+        selected_polygon.updatePolygon();
+    })
+    // listen for edit event on adding new vertices
+    google.maps.event.addListener(keepout_polygon.getPath(), "insert_at", function() {
+        selectPolygon(selected_polygon);
+        selected_polygon.updatePolygon();
+    })
+    // listen for undo edit event on polygon
+    google.maps.event.addListener(keepout_polygon.getPath(), "remove_at", function() {
+        selectPolygon(selected_polygon);
+        selected_polygon.updatePolygon();
+    })
+ 
+    // get MVCArray of MVCArrays which are each one panel
+    var panels = selected_polygon.panelArray.getPaths();
+    for (var i=0; i<panels.getLength(); i++) {
+        var panel = panels.getAt(i);
+        for (var j=0; j<panel.getLength(); j++) {
+            var xy = panel.getAt(j);
+            if (google.maps.geometry.poly.containsLocation(xy, keepout_polygon)) {
+                console.log(true);
+                panels.removeAt(i);
+                i--; // having removed a panel, we must remain at the same index
+                break;
+            }
+        }
+    }
+    selected_polygon.panelArray.setPaths(panels);
+}
+
 function setZoomOnPolygon(polygon_object) {
     var bound = new google.maps.LatLngBounds(null);
     for(var i=0; i<polygon_object.coordinates.length; i++) 
         bound.extend( new google.maps.LatLng(polygon_object.coordinates[i].lat(), 
             polygon_object.coordinates[i].lng()));
 
-    map.setZoom(20);
+    map.setZoom(21);
     map.fitBounds(bound);
 }
 
 function getPolygonCenter(coordinates) {
     var bound = new google.maps.LatLngBounds();
     for(var i=0;i<coordinates.length; i++) {
-        bound.extend( new google.maps.LatLng(coordinates[i].lat(), coordinates[i].lng()));
+        bound.extend(coordinates[i]);
     }
     return bound.getCenter();
 }
@@ -740,7 +806,8 @@ function createPolygonListButton() {
     p_list.appendChild(entry);
 
     return { entry      : entry, 
-            delete_btn : delete_btn };
+            delete_btn  : delete_btn 
+           };
 }
 
 function Polygon(polygon) // polygon object
@@ -749,6 +816,10 @@ function Polygon(polygon) // polygon object
 
     this.polygon = polygon;
     this.coordinates = polygon.getPath().getArray();
+    this.keepouts = [];
+    this.panelArray = null;
+    this.panelArrayListener = null;
+    this.listeners = [];
     this.azimuthValue = 120;
     this.orientationValue = 'portrait';
     this.rowSpaceValue = 1.6;
@@ -759,9 +830,6 @@ function Polygon(polygon) // polygon object
     this.systemCapacity = "loading...";
     this.latlngCenter = getPolygonCenter(this.coordinates); // updated in panelLayout()
     this.energyProduction = "loading...";
-    this.panelArray = null;
-    this.panelArrayListener = null;
-    this.listeners = [];
     this.numPanels = "loading...";
     this.panelType = null;
 
@@ -867,7 +935,6 @@ function initialize() {
     google.maps.event.addListener(map, 'idle', function() {
         // create listener for draw button
         drawButtonListener(draw);
-        MYLIBRARY.setDrawingModeDraw();
     });
 
     // event listener to obtain lat/lng coordinates from drawn polygon **************
@@ -878,8 +945,11 @@ function initialize() {
         });
 
         //******DETERMINE IF KEEPOUT*******
-        if (MYLIBRARY.getDrawingMode())
+        var KEEPOUT_MODE = 1;
+        if (MYLIBRARY.getDrawingMode() == KEEPOUT_MODE) {
+            addKeepout(polygon);
             return;
+        }
 
         // create polygon object
         var p = new Polygon(polygon);
