@@ -115,16 +115,19 @@ function CenterControl(controlDiv, map) {
     controlText.innerHTML += '<input class="form-control" id ="rowSpace" type="text" placeholder="Row space (>1 ft)">';
     controlText.innerHTML += '<select class="form-control" id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select>';
 
+    //sites tab's html
     var sitesList = document.createElement('h4');
     sitesList.id = 'sites';
     sitesList.innerHTML = 'Sites';
     sitesList.style.display = 'none';
 
+    //reports tab's html
     var reportList = document.createElement('h4');
     reportList.id = 'reports';
     reportList.innerHTML = 'Reports';
     reportList.style.display = 'none';
 
+    //quotes tab's html
     var quoteList = document.createElement('h4');
     quoteList.id = 'quotes';
     quoteList.innerHTML = 'Quotes';
@@ -175,7 +178,9 @@ function CenterControl(controlDiv, map) {
                                         <button class="braquet-btn" id="draw" style="width:49%; float:left;">Draw</button>\
                                         <button class="braquet-btn" id="keepout" style="width:49%">Keepout</button>\
                                     </div>\
-                                    
+                                    <div id="email">\
+                                        <button class="braquet-btn" id="sendemail">Email Report</button>\
+                                    </div>\
                                   </div>\
                                   <img id="loading_gif" src="/static/images/loading.gif" height="25" width="275" style="display:none;"/>\
                                   <div id="email_success" style="color:#3c763d;display:none;">Email Report Sent!</div>'
@@ -184,11 +189,11 @@ function CenterControl(controlDiv, map) {
 
     }
 
-//displays the content for each tab and edits the css for the tab itself
+//activates the clicked tab and its html content
 var switchTab = function(value){
     var tabArray = ['collapse1', 'sites', 'reports', 'quotes'];
 
-    //looks for the current active tab and deactivates all active features
+    //looks for the current active tab and deactivates its features
     for(var i=0;i<tabArray.length;i++){
         console.log(i)
         if(document.getElementsByClassName('nav-tabs')[0].children[i].className=='active'){
