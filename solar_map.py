@@ -75,7 +75,7 @@ def freemapview():
 
 @app.route("/dashboard", methods=["GET"])
 def dashboard():
-	print "REFERRER****************" + request.referrer
+	# print "REFERRER****************" + request.referrer
 	user_data = {}
 	if user.is_authenticated():
 		user_data['logged_in'] = True
