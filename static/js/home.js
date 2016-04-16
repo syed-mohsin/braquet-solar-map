@@ -390,6 +390,8 @@ function selectPolygon(polygon_object) {
     polygon_object.click_status = 1;
     polygon_object.polygon.setOptions({fillColor: 'green',
                                        strokeColor: 'green'});
+    if (polygon_object.panelArray != null)
+        polygon_object.panelArray.setOptions({fillOpacity: 1.0});
 
     setZoomOnPolygon(polygon_object);
     var project_stats = document.getElementById("projectStats");
@@ -421,8 +423,9 @@ function unselectAllPolygons() {
     for (i=0;i<polygons.length;i++) {
         if (polygons[i].click_status == 1) {
             polygons[i].click_status = 0;
-            polygons[i].polygon.setOptions({fillColor: 'yellow',
-                                            strokeColor: 'yellow'});
+            polygons[i].polygon.setOptions({fillColor: 'grey',
+                                            strokeColor: 'grey'});
+            polygons[i].panelArray.setOptions({fillOpacity: .25});
         }
     }
 }    
@@ -1081,8 +1084,8 @@ function initialize() {
         // listen for mouse out polygon event
         google.maps.event.addListener(p.polygon, "mouseout", function(event) {
             if(p.click_status == 0) // unselected
-                p.polygon.setOptions({fillColor: "yellow",
-                                  strokeColor: "yellow"});
+                p.polygon.setOptions({fillColor: "gray",
+                                  strokeColor: "gray"});
             else // selected
                 p.polygon.setOptions({fillColor: "green",
                                   strokeColor: "green"});
