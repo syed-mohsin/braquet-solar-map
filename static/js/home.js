@@ -184,8 +184,11 @@ function CenterControl(controlDiv, map) {
 
     }
 
+//displays the content for each tab and edits the css for the tab itself
 var switchTab = function(value){
     var tabArray = ['collapse1', 'sites', 'reports', 'quotes'];
+
+    //looks for the current active tab and deactivates all active features
     for(var i=0;i<tabArray.length;i++){
         console.log(i)
         if(document.getElementsByClassName('nav-tabs')[0].children[i].className=='active'){
@@ -194,6 +197,7 @@ var switchTab = function(value){
         }
     }
     
+    //activates the clicked tab
     document.getElementsByClassName('nav-tabs')[0].children[value].className = 'active'
     document.getElementById(tabArray[value]).style.display = 'initial';
 }
