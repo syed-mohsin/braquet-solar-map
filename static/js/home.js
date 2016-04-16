@@ -797,20 +797,20 @@ function createPolygonListButton() {
     var p_list = document.getElementById('polygon_list');
     var entry = document.createElement('div');
     entry.className = "list-group-item";
-    var description = document.createElement('button');
-    description.className = "btn btn-xs btn-info";
-    description.innerHTML = "Rooftop #" + MYLIBRARY.getPolygons().length;
+    var entry_btn = document.createElement('button');
+    entry_btn.className = "btn btn-xs btn-info";
+    entry_btn.innerHTML = "Rooftop #" + MYLIBRARY.getPolygons().length;
     var delete_span = document.createElement('span');
     delete_span.className = "pull-right";
     var delete_btn = document.createElement('button');
     delete_btn.className = "btn btn-xs btn-warning";
     delete_btn.innerHTML = "&times";
     delete_span.appendChild(delete_btn);
-    entry.appendChild(description);
+    entry.appendChild(entry_btn);
     entry.appendChild(delete_span);
     p_list.appendChild(entry);
 
-    return { entry      : entry, 
+    return { entry_btn  : entry_btn, 
             delete_btn  : delete_btn 
            };
 }
@@ -981,23 +981,23 @@ function initialize() {
 
         // add a new polygon btn (and delete btn) to polygon_list
         var list_button_group = createPolygonListButton();
-        var entry = list_button_group.entry;
+        var entry_btn = list_button_group.entry_btn;
         var delete_btn = list_button_group.delete_btn;
 
         // add a listener for polygon_list button
-        entry.onmouseup = function () {
+        entry_btn.onmouseup = function () {
             selectPolygon(p);
         };
 
         // add a listener to delete polygon and polygon button
         delete_btn.onmouseup = function () {
-            console.log(document.getElementById("projectStats"))
+            console.log(document.getElementById("projectStats"));
             deleteProjectStats();
             p.panelArray.setMap(null);
             p.polygon.setMap(null);
             for (var i=0; i<p.keepouts.length;i++)
                 p.keepouts[i].setMap(null);
-            list_button_group.entry.parentNode.removeChild(entry);
+            entry_btn.parentNode.parentNode.removeChild(entry_btn.parentNode);
             MYLIBRARY.removePolygon(p);
             
             delete p;
