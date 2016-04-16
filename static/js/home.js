@@ -949,9 +949,26 @@ function initialize() {
             drawingMode: null
         });
 
+        // remove polygon if it is keepout and not in keepout mode
+        // or there is currently no selected polygon that exists
+        var DRAW_MODE = 0;
+        if (MYLIBRARY.getDrawingMode() === DRAW_MODE) {
+            if (polygon.get('fillColor') != 'yellow') {
+                polygon.setMap(null);
+                return;
+            }
+        }
+
         //******DETERMINE IF KEEPOUT*******
         var KEEPOUT_MODE = 1;
-        if (MYLIBRARY.getDrawingMode() == KEEPOUT_MODE) {
+        if (MYLIBRARY.getDrawingMode() === KEEPOUT_MODE) {
+            // no polygon to map to or invalid fill color
+            if (getSelectedPolygon() == null || polygon.get('fillColor') !== 'red') {
+                polygon.setMap(null);
+                return;
+            }
+
+            // may finally add keepout polygon
             addKeepout(polygon);
             return;
         }
