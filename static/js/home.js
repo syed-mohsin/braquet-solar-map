@@ -298,6 +298,9 @@ function drawButtonListener(draw) {
         // set drawing mode to draw
         MYLIBRARY.setDrawingModeDraw();
         // first clear current drawing mode
+        // restore panel transparency
+        if (getSelectedPolygon() != null)
+            getSelectedPolygon().panelArray.setOptions({fillOpacity : 1.0});
         draw.setDrawingMode(null);
         // set drawing type of draw
         draw.setOptions({
@@ -319,6 +322,8 @@ function keepoutButtonListener(draw) {
             return;
         // set drawing mode to keepout
         MYLIBRARY.setDrawingModeKeepout();
+        // set panels as transparent
+        getSelectedPolygon().panelArray.setOptions({fillOpacity : .25});
         // first clear current drawing mode
         draw.setDrawingMode(null);
         // set drawing type for keepout
@@ -869,10 +874,20 @@ function initialize() {
     map = new google.maps.Map(
     document.getElementById(MYLIBRARY.getMapId()), {
         center: new google.maps.LatLng(37.7918, -122.4266),
+        scrollwheel: true,
         zoom: 21,
         tilt: 0,
         mapTypeId: google.maps.MapTypeId.SATELLITE
     });
+    // fx = function(e) {
+    //     e.preventDefault();
+    //     var z = (e.wheelDelta > 0 || e.detail < 0) ? 1 : -1;
+    //     map.setZoom(map.getZoom() + z);
+    //     return false;
+    // };
+    // google.maps.event.addDomListener(map.getDiv(), 'mousewheel', fx);
+    // google.maps.event.addDomListener(map.getDiv(), 'DOMMouseScroll', fx);
+
 
     // Try HTML5 geolocation
     if (navigator.geolocation) {
@@ -968,6 +983,8 @@ function initialize() {
                 return;
             }
 
+            // restore fillopacity of panels on selected polygon
+            getSelectedPolygon().panelArray.setOptions({fillOpacity: 1.0});
             // may finally add keepout polygon
             addKeepout(polygon);
             return;

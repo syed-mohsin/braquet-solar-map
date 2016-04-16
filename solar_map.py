@@ -75,6 +75,7 @@ def freemapview():
 
 @app.route("/dashboard", methods=["GET"])
 def dashboard():
+	print "REFERRER****************" + request.referrer
 	user_data = {}
 	if user.is_authenticated():
 		user_data['logged_in'] = True
@@ -267,7 +268,6 @@ def register():
 		        app.config['STORMPATH_REGISTRATION_TEMPLATE'],
 		        form = form,
 		    )
-
 
 if __name__ == "__main__":
 	app.run(debug=True)
