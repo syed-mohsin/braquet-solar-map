@@ -71,7 +71,14 @@ function CenterControl(controlDiv, map) {
     controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
     controlUI.style.padding = '10px';
     controlUI.style.textAlign = 'left';
-    controlUI.innerHTML = '<a data-toggle="collapse" href="#collapse1"><h5>Project Settings<span class="caret" style="margin-left:5px;"></span></h5></a>';
+    controlUI.innerHTML = '<h4>Dashboard</h4>';
+    controlUI.innerHTML +=
+                            '<ul class="nav nav-tabs">\
+                                <li class="active"><a href="#" id="0" onclick="switchTab(this.id)">Settings</a></li>\
+                                <li><a href="#" id="1" onclick="switchTab(this.id)">Sites</a></li>\
+                                <li><a href="#" id="2" onclick="switchTab(this.id)">Reports</a></li>\
+                                <li><a href="#" id="3" onclick="switchTab(this.id)">Quotes</a></li>\
+                            </ul>';
     controlDiv.appendChild(controlUI);
 
     var selectPanel = document.createElement('select');
@@ -107,9 +114,27 @@ function CenterControl(controlDiv, map) {
     controlText.innerHTML += '<input class="form-control" id ="tilt" type="text" placeholder="Tilt (0-90 deg)">';
     controlText.innerHTML += '<input class="form-control" id ="rowSpace" type="text" placeholder="Row space (>1 ft)">';
     controlText.innerHTML += '<select class="form-control" id="orientation"><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select>';
+
+    var sitesList = document.createElement('h4');
+    sitesList.id = 'sites';
+    sitesList.innerHTML = 'Sites';
+    sitesList.style.display = 'none';
+
+    var reportList = document.createElement('h4');
+    reportList.id = 'reports';
+    reportList.innerHTML = 'Reports';
+    reportList.style.display = 'none';
+
+    var quoteList = document.createElement('h4');
+    quoteList.id = 'quotes';
+    quoteList.innerHTML = 'Quotes';
+    quoteList.style.display = 'none';
     
     controlText.appendChild(selectPanel);
     controlUI.appendChild(controlText);
+    controlUI.appendChild(sitesList);
+    controlUI.appendChild(reportList);
+    controlUI.appendChild(quoteList);
 
     // FOR DEMO
     if (MYLIBRARY.getIsDemo()) {
@@ -150,15 +175,28 @@ function CenterControl(controlDiv, map) {
                                         <button class="braquet-btn" id="draw" style="width:49%; float:left;">Draw</button>\
                                         <button class="braquet-btn" id="keepout" style="width:49%">Keepout</button>\
                                     </div>\
-                                    <div id="email">\
-                                        <button class="braquet-btn" id="sendemail">Email Report</button>\
-                                    </div>\
+                                    
                                   </div>\
                                   <img id="loading_gif" src="/static/images/loading.gif" height="25" width="275" style="display:none;"/>\
                                   <div id="email_success" style="color:#3c763d;display:none;">Email Report Sent!</div>'
             }
+
+
     }
 
+var switchTab = function(value){
+    var tabArray = ['collapse1', 'sites', 'reports', 'quotes'];
+    for(var i=0;i<tabArray.length;i++){
+        console.log(i)
+        if(document.getElementsByClassName('nav-tabs')[0].children[i].className=='active'){
+            document.getElementsByClassName('nav-tabs')[0].children[i].className=''
+            document.getElementById(tabArray[i]).style.display = 'none';
+        }
+    }
+    
+    document.getElementsByClassName('nav-tabs')[0].children[value].className = 'active'
+    document.getElementById(tabArray[value]).style.display = 'initial';
+}
 // courtesy of Stack Overflow question # 2956966
 // executes a function at a specified interval X times
 function setIntervalX(callback, delay, repetitions) {
