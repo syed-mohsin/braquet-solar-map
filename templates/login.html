@@ -13,17 +13,30 @@
   <base target="_parent" />
   <script>window.top.location.href = "/dashboard";</script>
 {% else %}
+<link href='https://fonts.googleapis.com/css?family=Maven+Pro:400,500,700,900' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<link rel="stylesheet" href="/static/css/main.css">
+<h4>Sign In</h4>
   {# Render the login form. #}
   <form method="post">
     {{ form.hidden_tag() }}
     {% if config['STORMPATH_ENABLE_USERNAME'] %}
-      {{ form.login(placeholder='Username or Email', required='true') }}
+      {{ form.login(placeholder='Username or Email', required='true', class='form-control') }}
     {% else %}
       {{ form.login(placeholder='Email', required='true') }}
     {% endif %}
     {{ form.password(placeholder='Password', required='true') }}
     <button type="submit">Log In</button>
   </form>
+  <script src="/static/js/formStyle.js"></script>
+  <script>
+  // var input = document.getElementsByTagName('input');
+
+  // for(var i=0; i<input.length; i++){
+  //   input[i].className = 'form-control';
+  // }
+  
+  </script>
 
   {# If social login is enabled, display social login buttons. #}
   {% if config['STORMPATH_ENABLE_FACEBOOK'] or config['STORMPATH_ENABLE_GOOGLE'] %}

@@ -62,7 +62,7 @@ input, select {
 .braquet-btn {
     color: white;
     background: black;
-    width: 48%;
+    width: 100%;
     border: none;
     display: inline-block;
     padding: 6px 12px;
@@ -161,13 +161,68 @@ input, select {
     100% {color:#3c763d;}
 }
 
+#login_data, #signup_data {
+  padding:0;
+}
 
 .modal-body .screen-shot {
-    width:350px;
+  width:350px;
 }
 
 .modal-body iframe {
-  height: 400px;
+  width: 100%;
+  padding:15px;
+  border: none;
+}
+
+#login_data iframe {
+  height:215px;
+}
+
+#signup_data iframe {
+  height:264px;
+}
+
+.selling-points {
+  overflow: auto;
+}
+
+.selling-points h5 {
+  margin-bottom: 20px;
+}
+
+.selling-points div {
+  margin: 10px 0px;
+}
+
+.selling-points .point {
+  overflow: auto;
+}
+
+.selling-points .glyphicon {
+  margin: 0px 15px 0px 0px;
+  float: left;
+}
+
+.selling-points .glyphicon-user#one {
+  margin: 0px;
+}
+
+.selling-points .glyphicon-user#two {
+  margin-right: 7px;
+}
+
+#given_name, #surname {
+  width:49%;
+  float: left;
+}
+
+#given_name {
+  margin-right: 5px;
+}
+
+#surname {
+  margin-right: 0px;
 }
 
 /* make keyframes that tell the start state and the end state of our object */
