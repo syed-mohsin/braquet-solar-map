@@ -59,6 +59,10 @@ input, select {
   width: 100%;
 }
 
+#quote {
+  margin:20px;
+}
+
 .braquet-btn {
     color: white;
     background: black;

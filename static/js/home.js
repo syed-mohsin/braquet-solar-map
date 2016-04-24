@@ -130,7 +130,23 @@ function CenterControl(controlDiv, map) {
     //quotes tab's html
     var quoteList = document.createElement('h4');
     quoteList.id = 'quotes';
-    quoteList.innerHTML = 'Quotes';
+    quoteList.innerHTML = '<div id="quote">\
+                                <button class="braquet-btn" id="quotebtn" onclick="quote()">Get a Quote</button>\
+                            </div>';
+    quoteList.innerHTML += '<div id="bidDisplay">\
+                                        <div style="display:block; color:black; float:left;margin-right:10px; ">Top Bidder - </div>\
+                                        <div id="bid1"></div>\
+                                        <div id="bid2">  Finding suppliers...</div>\
+                                        <div id="bid3">  Ying Li: $0.82 per watt</div>\
+                                        <div id="bid4">  Lightway: $0.65 per watt</div>\
+                                        <div id="bid5">  SunPower: $0.63 per watt</div>\
+                                        <div id="bid6" style="color:#3c763d"> You got a panel supplier!</div>\
+                                        <div id="bid7">\
+                                            <br><img style="margin-top:5px" src="/static/images/logo-sunpower.jpg"><br>\
+                                            <img src="/static/images/sunpower-panel.jpg">\
+                                        </div>\
+                                  </div>';
+
     quoteList.style.display = 'none';
     
     controlText.appendChild(selectPanel);
