@@ -45,7 +45,6 @@ mongo = credentials.connect()
 google_places = GooglePlaces(credentials.API_KEY)
 geolocator = Nominatim()
 
-@app.route("/demo", methods=["GET"])
 @app.route("/index", methods=["GET"])
 @app.route("/", methods=["GET"])
 def freemapview():
@@ -53,11 +52,7 @@ def freemapview():
 		return redirect(url_for("dashboard"))
 
 	rule = request.url_rule
-	is_demo = False
 	user_data = {'logged_in' : False}
-	
-	if 'demo' in rule.rule:
-		is_demo = True
 
 	logo = "Braquet | Layout"
 	
@@ -70,8 +65,7 @@ def freemapview():
 		style="height:600px;width:1000px;margin:0;"
 	)
 
-	return render_template('home.html', mymap=mymap, logo=logo, is_demo=is_demo, 
-						   user_data=user_data)
+	return render_template('home.html', mymap=mymap, logo=logo, user_data=user_data)
 
 @app.route("/dashboard", methods=["GET"])
 def dashboard():

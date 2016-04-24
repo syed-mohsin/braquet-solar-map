@@ -155,55 +155,22 @@ function CenterControl(controlDiv, map) {
     controlUI.appendChild(reportList);
     controlUI.appendChild(quoteList);
 
-    // FOR DEMO
-    if (MYLIBRARY.getIsDemo()) {
-        controlText.innerHTML += '<div class="action">\
-                                    <div id="submit">\
-                                        <button class="braquet-btn" id="update">Update</button>\
-                                    </div>\
-                                    <div id="quote">\
-                                        <button class="braquet-btn" id="quotebtn" onclick="quote()">Get a Quote</button>\
-                                    </div>\
-                                    <div id="email">\
-                                        <button class="braquet-btn" id="sendemail">Email Report</button>\
-                                    </div>\
-                                  </div>\
-                                  <img id="loading_gif" src="/static/images/loading.gif" height="25" width="275" style="display:none;"/>\
-                                  <div id="email_success" style="color:#3c763d;display:none;">Email Report Sent!</div>\
-                                  <div id="bidDisplay">\
-                                        <div style="display:block; color:black; float:left;margin-right:10px; ">Top Bidder - </div>\
-                                        <div id="bid1"></div>\
-                                        <div id="bid2">  Finding suppliers...</div>\
-                                        <div id="bid3">  Ying Li: $0.82 per watt</div>\
-                                        <div id="bid4">  Lightway: $0.65 per watt</div>\
-                                        <div id="bid5">  SunPower: $0.63 per watt</div>\
-                                        <div id="bid6" style="color:#3c763d"> You got a panel supplier!</div>\
-                                        <div id="bid7">\
-                                            <img style="margin-top:5px" src="/static/images/logo-sunpower.jpg"><br>\
-                                            <img src="/static/images/sunpower-panel.jpg">\
-                                        </div>\
-                                  </div>'
-    } else {
-
     //live project settings html
-        controlText.innerHTML += '<div class="action">\
-                                    <div id="submit">\
-                                        <button class="braquet-btn" id="update" style="width:100%">Update</button>\
-                                    </div>\
-                                    <div id="polygon">\
-                                        <button class="braquet-btn" id="draw" style="width:49%; float:left;">Draw</button>\
-                                        <button class="braquet-btn" id="keepout" style="width:49%">Keepout</button>\
-                                    </div>\
-                                    <div id="email">\
-                                        <button class="braquet-btn" id="sendemail">Email Report</button>\
-                                    </div>\
-                                  </div>\
-                                  <img id="loading_gif" src="/static/images/loading.gif" height="25" width="275" style="display:none;"/>\
-                                  <div id="email_success" style="color:#3c763d;display:none;">Email Report Sent!</div>'
-            }
-
-
-    }
+    controlText.innerHTML += '<div class="action">\
+                                <div id="submit">\
+                                    <button class="braquet-btn" id="update" style="width:100%">Update</button>\
+                                </div>\
+                                <div id="polygon">\
+                                    <button class="braquet-btn" id="draw" style="width:49%; float:left;">Draw</button>\
+                                    <button class="braquet-btn" id="keepout" style="width:49%">Keepout</button>\
+                                </div>\
+                                <div id="email">\
+                                    <button class="braquet-btn" id="sendemail">Email Report</button>\
+                                </div>\
+                              </div>\
+                              <img id="loading_gif" src="/static/images/loading.gif" height="25" width="275" style="display:none;"/>\
+                              <div id="email_success" style="color:#3c763d;display:none;">Email Report Sent!</div>';
+}
 
 //activates the clicked tab and its html content
 var switchTab = function(value){
@@ -865,7 +832,7 @@ function getPolygonCenter(coordinates) {
 }
 
 function createPolygonListButton() {
-    var p_list = document.getElementById('polygon_list');
+    var p_list = document.getElementById('sites');
     var entry = document.createElement('div');
     entry.className = "list-group-item";
     var entry_btn = document.createElement('button');
@@ -991,12 +958,6 @@ function initialize() {
     var centerControl = new CenterControl(centerControlDiv, map);
     centerControlDiv.index = 1;
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(centerControlDiv);
-
-    // position polygon tracking list
-    var polygonListDiv = document.createElement('div');
-    polygonListDiv.className = "list-group";
-    polygonListDiv.id = "polygon_list";
-    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(polygonListDiv);
 
     // drawing manager
     var draw = new google.maps.drawing.DrawingManager({
