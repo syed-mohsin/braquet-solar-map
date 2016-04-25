@@ -97,16 +97,20 @@ input, select {
     margin-right:5px;
 }
 
+.stats {
+  width: 50%;
+  float: left;
+}
+
+
 #bidDisplay {
   display: none;
-  margin-top:20px;
-  padding-bottom: 20px;
   font-size: 12px;
   font-weight: bold;
 }
 
 #bidDisplay div {
-    display: none;
+  display: none;
 }
 
 #bid7 img{
@@ -115,6 +119,8 @@ input, select {
 
 #bidDisplay div.appear {
     color: black;
+    position: relative;
+    top: -6px;
     -webkit-animation-name: hello; /* Chrome, Safari, Opera */
     -webkit-animation-duration: 2s; /* Chrome, Safari, Opera */
     animation-name: hello;
@@ -127,6 +133,8 @@ input, select {
     -webkit-animation-duration: 1s; /* Chrome, Safari, Opera */
     animation-name: selected;
     animation-duration: 1s;
+    position: relative;
+    top: -6px;
 }
 
 /* Chrome, Safari, Opera */
