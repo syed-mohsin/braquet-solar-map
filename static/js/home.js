@@ -423,18 +423,18 @@ function selectPolygon(polygon_object) {
 
     setZoomOnPolygon(polygon_object);
     var project_stats = document.getElementById("projectStats");
-    project_stats.innerHTML = "<div class='stats'>Nameplate Capacity </div>" + polygon_object.systemCapacity + "kW<br>";
-    project_stats.innerHTML += "<div class='stats'># of Panels </div>" + polygon_object.numPanels + "<br>";
-    project_stats.innerHTML += "<div class='stats'>Energy Production </div>" + Math.round(polygon_object.energyProduction[2], 0) + "kWh (monthly)<br>";
-    project_stats.innerHTML += "<div class='stats'>Panel Type </div>" + polygon_object.panelType;
+    project_stats.innerHTML = "<div class='stats'>Nameplate Capacity </div>" + "<div class='numbers'>" + polygon_object.systemCapacity + "kW</div><br>";
+    project_stats.innerHTML += "<div class='stats'># of Panels </div>" + "<div class='numbers'>" + polygon_object.numPanels + "</div><br>";
+    project_stats.innerHTML += "<div class='stats'>Energy Production </div>" + "<div class='numbers'>" + Math.round(polygon_object.energyProduction[2], 0) + "kWh (monthly)</div><br>";
+    project_stats.innerHTML += "<div class='stats'>Panel Type </div>" + "<div class='numbers'>" + polygon_object.panelType + "</div>";
 }
 
 function deleteProjectStats() {
     var project_stats = document.getElementById("projectStats");
-    project_stats.innerHTML = "<div class='stats'>Nameplate Capacity </div>" + "0" + "kW<br>";
-    project_stats.innerHTML += "<div class='stats'># of Panels </div>" + "0" + "<br>";
-    project_stats.innerHTML += "<div class='stats'>Energy Production </div>" + "0" + "kWh (monthly)<br>";
-    project_stats.innerHTML += "<div class='stats'>Panel Type </div>" + "NA";
+    project_stats.innerHTML = "<div class='stats'>Nameplate Capacity </div>" + "<div class='numbers'>" + "0" + "kW</div><br>";
+    project_stats.innerHTML += "<div class='stats'># of Panels </div>" + "<div class='numbers'>" + "0" + "</div><br>";
+    project_stats.innerHTML += "<div class='stats'>Energy Production </div>" + "<div class='numbers'>" + "0" + "kWh (monthly)</div><br>";
+    project_stats.innerHTML += "<div class='stats'>Panel Type </div>" + "<div class='numbers'>" + "NA</div>";
 }
 
 function getSelectedPolygon() {
