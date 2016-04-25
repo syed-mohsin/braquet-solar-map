@@ -15,10 +15,6 @@ a:hover {
     text-align: center;
 }
 
-.stats {
-    margin:5px;
-}
-
 input, select {
     margin-bottom: 15px;
     margin-right: 10px;
@@ -97,9 +93,21 @@ input, select {
     margin-right:5px;
 }
 
+#projectStats {
+  margin: 10px 0px;
+}
+
 .stats {
-  width: 50%;
+  margin: 5px;
+  width: 40%;
   float: left;
+  text-align: left;
+  font-weight: bold;
+}
+
+.numbers {
+  position: relative;
+  top: 5px;
 }
 
 

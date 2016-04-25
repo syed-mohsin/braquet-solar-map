@@ -405,10 +405,10 @@ function updateSystemListener() {
             selected_polygon.energyProduction = data;
             // update table with system info
             var project_stats = document.getElementById("projectStats");
-            project_stats.innerHTML = "<div class='stats'>Nameplate Capacity: </div>" + "<div class='numbers'>" + selected_polygon.systemCapacity + "kW</div><br>";
-            project_stats.innerHTML += "<div class='stats'># of panels: </div>" + "<div class='numbers'>" + selected_polygon.numPanels + "</div><br>";
-            project_stats.innerHTML += "<div class='stats'>Energy Production: </div>" + "<div class='numbers'>" + Math.round(selected_polygon.energyProduction[2], 0) + "kWh (monthly)</div><br>";
-            project_stats.innerHTML += "<div class='stats'>Panel Type: </div>" + "<div class='numbers'>" + selected_polygon.panelType + "</div>";
+            project_stats.innerHTML = "<div class='stats'>Nameplate Capacity </div>" + "<div class='numbers'>" + selected_polygon.systemCapacity + "kW</div><br>";
+            project_stats.innerHTML += "<div class='stats'># of Panels </div>" + "<div class='numbers'>" + selected_polygon.numPanels + "</div><br>";
+            project_stats.innerHTML += "<div class='stats'>Energy Production </div>" + "<div class='numbers'>" + Math.round(selected_polygon.energyProduction[2], 0) + "kWh (monthly)</div><br>";
+            project_stats.innerHTML += "<div class='stats'>Panel Type </div>" + "<div class='numbers'>" + selected_polygon.panelType + "</div>";
         });   
     };
 }
@@ -423,18 +423,18 @@ function selectPolygon(polygon_object) {
 
     setZoomOnPolygon(polygon_object);
     var project_stats = document.getElementById("projectStats");
-    project_stats.innerHTML = "<div class='stats'>Nameplate Capacity: </div>" + polygon_object.systemCapacity + "kW<br>";
-    project_stats.innerHTML += "<div class='stats'># of panels: </div>" + polygon_object.numPanels + "<br>";
-    project_stats.innerHTML += "<div class='stats'>Energy Production: </div>" + Math.round(polygon_object.energyProduction[2], 0) + "kWh (monthly)<br>";
-    project_stats.innerHTML += "<div class='stats'>Panel Type: </div>" + polygon_object.panelType;
+    project_stats.innerHTML = "<div class='stats'>Nameplate Capacity </div>" + polygon_object.systemCapacity + "kW<br>";
+    project_stats.innerHTML += "<div class='stats'># of Panels </div>" + polygon_object.numPanels + "<br>";
+    project_stats.innerHTML += "<div class='stats'>Energy Production </div>" + Math.round(polygon_object.energyProduction[2], 0) + "kWh (monthly)<br>";
+    project_stats.innerHTML += "<div class='stats'>Panel Type </div>" + polygon_object.panelType;
 }
 
 function deleteProjectStats() {
     var project_stats = document.getElementById("projectStats");
-    project_stats.innerHTML = "<div class='stats'>Nameplate Capacity: </div>" + "0" + "kW<br>";
-    project_stats.innerHTML += "<div class='stats'># of panels: </div>" + "0" + "<br>";
-    project_stats.innerHTML += "<div class='stats'>Energy Production: </div>" + "0" + "kWh (monthly)<br>";
-    project_stats.innerHTML += "<div class='stats'>Panel Type: </div>" + "NA";
+    project_stats.innerHTML = "<div class='stats'>Nameplate Capacity </div>" + "0" + "kW<br>";
+    project_stats.innerHTML += "<div class='stats'># of Panels </div>" + "0" + "<br>";
+    project_stats.innerHTML += "<div class='stats'>Energy Production </div>" + "0" + "kWh (monthly)<br>";
+    project_stats.innerHTML += "<div class='stats'>Panel Type </div>" + "NA";
 }
 
 function getSelectedPolygon() {
@@ -1066,10 +1066,10 @@ function initialize() {
 
             // update table with system info
             var project_stats = document.getElementById("projectStats");
-            project_stats.innerHTML = "<div class='stats'>Nameplate Capacity: </div>" + "<div class='numbers'>" + p.systemCapacity + "kW</div><br>";
-            project_stats.innerHTML += "<div class='stats'># of panels: </div>" + "<div class='numbers'>" + p.numPanels + "</div><br>";
-            project_stats.innerHTML += "<div class='stats'>Energy Production: </div>" + "<div class='numbers'>" + Math.round(p.energyProduction[2],0) + "kWh (monthly)</div><br>";
-            project_stats.innerHTML += "<div class='stats'>Panel Type: </div>" + "<div class='numbers'>" + p.panelType + "</div>";
+            project_stats.innerHTML = "<div class='stats'>Nameplate Capacity </div>" + "<div class='numbers'>" + p.systemCapacity + "kW</div><br>";
+            project_stats.innerHTML += "<div class='stats'># of Panels </div>" + "<div class='numbers'>" + p.numPanels + "</div><br>";
+            project_stats.innerHTML += "<div class='stats'>Energy Production </div>" + "<div class='numbers'>" + Math.round(p.energyProduction[2],0) + "kWh (monthly)</div><br>";
+            project_stats.innerHTML += "<div class='stats'>Panel Type </div>" + "<div class='numbers'>" + p.panelType + "</div>";
 
             // listener for click on polygon
             google.maps.event.addListener(p.polygon, 'click', function () {
