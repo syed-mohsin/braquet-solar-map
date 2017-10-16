@@ -10,7 +10,7 @@
       <script src="static/js/html2canvas.js" type="text/javascript"></script>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-      <script src="https://maps.googleapis.com/maps/api/js?libraries=drawing,places,geometry" type="text/javascript"></script>
+      <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRKjGUvrzzmZFJqSk_RrnZK4nWKUsaPTQ&libraries=drawing,places,geometry" type="text/javascript"></script>
       <script src="https://www.gstatic.com/charts/loader.js" type="text/javascript"></script>
       <script src="static/js/init.js" type="text/javascript"></script>
       <script type="text/javascript">
@@ -31,18 +31,18 @@
 
   <!-- Modal -->
 <div id="app">
-    
+
     <div style="display:none;" class="btn btn-primary" id="button-modal">Click!</div>
-    
+
     <div id="modal-id" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
          <div class="modal-dialog">
-                    
+
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
         <h4 class="modal-title">Welcome to Braquet!</h4>
       </div>
-      <div class="modal-body" style="height:400px;"> 
+      <div class="modal-body" style="height:400px;">
           <div id="1">
             <p>Use the map's search bar to find a rooftop</p>
             <img class="screen-shot" src="/static/images/sample_roof.png">
@@ -65,7 +65,7 @@
         <button id="end" type="button" class="btn btn-default" data-dismiss="modal">Ok, got it.</button>
       </div>
     </div>
-    
+
         </div>
     </div>
 </div>
@@ -112,49 +112,49 @@
     <!-- Modal -->
     <div class="modal fade" id="settings" role="dialog">
     <div class="modal-dialog">
-    
+
       <!-- Modal content-->
       <div class="modal-content">
-      
+
         <div class="modal-body">
           {{user_data['email']}}
         </div>
-       
+
       </div>
-      
+
     </div>
   </div>
 
 {% else %}
   <div class="modal fade" id="modal_login" role="dialog">
     <div class="modal-dialog">
-    
+
       <!-- Modal content-->
       <div class="modal-content">
-      
+
         <div id="login_data" class="modal-body">
-          
+
         </div>
-       
+
       </div>
-      
+
     </div>
   </div>
     <div class="modal fade" id="modal_signup" role="dialog">
     <div class="modal-dialog">
-    
+
       <!-- Modal content-->
       <div class="modal-content">
-      
+
         <div id="signup_data" class="modal-body">
 
         </div>
 
       </div>
-      
+
     </div>
   </div>
 {% endif %}
-        <div id="{{mymap.identifier}}" class="{{mymap.cls}}"></div>       
+        <div id="{{mymap.identifier}}" class="{{mymap.cls}}"></div>
     </body>
 </html>
