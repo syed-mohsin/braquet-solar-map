@@ -9,20 +9,10 @@ https://braquet.pythonanywhere.com
 
 #### Main Dependencies:
 ```
-pip install flask-googlemaps flask geopy python-google-places numpy Flask-PyMongo
+pip install -r requirements.txt
 ```
 
-#### MAC
-```
-$ flask/bin/pip install flask flask-login flask-openid flask-mail flask-sqlalchemy sqlalchemy-migrate flask-whooshalchemy flask-wtf flask-babel guess_language flipflop coverage
-```
-
-#### Windows
-```
-$ flask\Scripts\pip install flask flask-login flask-openid flask-mail flask-sqlalchemy sqlalchemy-migrate flask-whooshalchemy flask-wtf flask-babel guess_language flipflop coverage
-```
-
-# Run Server
+# Run Server (after adding relevant env variables)
 ```
 $ python solar_map.py
 ```
