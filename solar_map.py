@@ -51,8 +51,6 @@ google_places = GooglePlaces(os.environ['API_KEY'])
 geolocator = Nominatim()
 NREL_API_KEY = os.environ['NREL_API_KEY']
 
-
-
 @app.route("/index", methods=["GET"])
 @app.route("/", methods=["GET"])
 def freemapview():
@@ -273,4 +271,4 @@ def register():
 		    )
 
 if __name__ == "__main__":
-	app.run(debug=True)
+	app.run(debug=False)

@@ -15,3 +15,4 @@ flask-babel
 guess_language
 flipflop
 coverage
+gunicorn

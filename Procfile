@@ -1,1 +1,1 @@
-web: python solar_map.py
+web: gunicorn app --log-file=-
