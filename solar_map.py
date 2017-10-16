@@ -184,7 +184,7 @@ def login():
 	            request.form.get('login'),
 	            request.form.get('password')
 	        )
-	    except StormpathError, err:
+	    except err:
 	    	flash(err.message.get('message'))
 	        return render_template('login.html', form=form)
 
@@ -262,7 +262,7 @@ def register():
 						success = True
 					)
 
-	            except StormpathError as err:
+	            except err:
 	                flash(err.message.get('message'))
 
 		    return render_template(
