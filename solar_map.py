@@ -111,7 +111,7 @@ def nrel():
 		try:
 			response = urllib2.urlopen("https://developer.nrel.gov/api/pvwatts/v5.json?api_key=" + NREL_API_KEY + \
 				"&lat=" + lat + "&lon=" + lng + "&system_capacity=" + capacity + "&azimuth=" + azimuth + "&tilt=" + tilt + "&array_type=1&module_type=0&losses=10")
-		except IOError, e:
+		except e:
 			return "ERROR: API call failed"
 
 		data = json.load(response)
