@@ -111,7 +111,7 @@ def nrel():
 		try:
 			response = urllib2.urlopen("https://developer.nrel.gov/api/pvwatts/v5.json?api_key=" + NREL_API_KEY + \
 				"&lat=" + lat + "&lon=" + lng + "&system_capacity=" + capacity + "&azimuth=" + azimuth + "&tilt=" + tilt + "&array_type=1&module_type=0&losses=10")
-		except e:
+		except IOError, e:
 			return "ERROR: API call failed"
 
 		data = json.load(response)
@@ -173,23 +173,23 @@ def login():
     tell the user their credentials are invalid).
     If the user is valid, we'll log them in, and store their session for later.
     """
-    # form = LoginForm()
+    form = LoginForm()
 
     if request.method == 'GET':
         return render_template('login.html', form=form)
 
-    # if request.method == 'POST':
-	#     try:
-	#         _user = User.from_login(
-	#             request.form.get('login'),
-	#             request.form.get('password')
-	#         )
-	#     except err:
-	#     	flash(err.message.get('message'))
-	#         return render_template('login.html', form=form)
-	#
-	#     login_user(_user, remember=True)
-	#     return render_template('login.html', form=form, success=True)
+    if request.method == 'POST':
+	    try:
+	        _user = User.from_login(
+	            request.form.get('login'),
+	            request.form.get('password')
+	        )
+	    except StormpathError, err:
+	    	flash(err.message.get('message'))
+	        return render_template('login.html', form=form)
+
+	    login_user(_user, remember=True)
+	    return render_template('login.html', form=form, success=True)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -201,7 +201,7 @@ def register():
 	template that is used to render this page can all be controlled via
 	Flask-Stormpath settings.
 	"""
-	# form = RegistrationForm()
+	form = RegistrationForm()
 
 	if request.method == 'GET':
 		return render_template(
@@ -209,66 +209,66 @@ def register():
 			form = form
 		)
 
-	# if request.method == 'POST':
-	# 	# If we received a POST request with valid information, we'll continue
-	#     # processing.
-	#     if form.validate_on_submit():
-	#         fail = False
-	#
-	#         # Iterate through all fields, grabbing the necessary form data and
-	#         # flashing error messages if required.
-	#         data = form.data
-	#         for field in data.keys():
-	#             if app.config['STORMPATH_ENABLE_%s' % field.upper()]:
-	#                 if app.config['STORMPATH_REQUIRE_%s' % field.upper()] and not data[field]:
-	#                     fail = True
-	#
-	#                     # Manually override the terms for first / last name to make
-	#                     # errors more user friendly.
-	#                     if field == 'given_name':
-	#                         field = 'first name'
-	#
-	#                     elif field == 'surname':
-	#                         field = 'last name'
-	#
-	#                     flash('%s is required.' % field.replace('_', ' ').title())
-	#
-	#         # If there are no missing fields (per our settings), continue.
-	#         if not fail:
-	#
-	#             # Attempt to create the user's account on Stormpath.
-	#             try:
-	#
-	# 				# Since Stormpath requires both the given_name and surname
-	# 				# fields be set, we'll just set the both to 'Anonymous' if
-	# 				# the user has # explicitly said they don't want to collect
-	# 				# those fields.
-	# 				data['given_name'] = data['given_name'] or 'Anonymous'
-	# 				data['surname'] = data['surname'] or 'Anonymous'
-	#
-	# 				# Create the user account on Stormpath.  If this fails, an
-	# 				# exception will be raised.
-	# 				account = User.create(**data)
-	#
-	# 				# If we're able to successfully create the user's account,
-	# 				# we'll log the user in (creating a secure session using
-	# 				# Flask-Login), then redirect the user to the
-	# 				# STORMPATH_REDIRECT_URL setting.
-	# 				login_user(account, remember=True)
-	#
-	# 				return render_template(
-	# 					app.config['STORMPATH_REGISTRATION_TEMPLATE'],
-	# 					form = form,
-	# 					success = True
-	# 				)
-	#
-	#             except err:
-	#                 flash(err.message.get('message'))
-	#
-	# 	    return render_template(
-	# 	        app.config['STORMPATH_REGISTRATION_TEMPLATE'],
-	# 	        form = form,
-	# 	    )
+	if request.method == 'POST':
+		# If we received a POST request with valid information, we'll continue
+	    # processing.
+	    if form.validate_on_submit():
+	        fail = False
+
+	        # Iterate through all fields, grabbing the necessary form data and
+	        # flashing error messages if required.
+	        data = form.data
+	        for field in data.keys():
+	            if app.config['STORMPATH_ENABLE_%s' % field.upper()]:
+	                if app.config['STORMPATH_REQUIRE_%s' % field.upper()] and not data[field]:
+	                    fail = True
+
+	                    # Manually override the terms for first / last name to make
+	                    # errors more user friendly.
+	                    if field == 'given_name':
+	                        field = 'first name'
+
+	                    elif field == 'surname':
+	                        field = 'last name'
+
+	                    flash('%s is required.' % field.replace('_', ' ').title())
+
+	        # If there are no missing fields (per our settings), continue.
+	        if not fail:
+
+	            # Attempt to create the user's account on Stormpath.
+	            try:
+
+					# Since Stormpath requires both the given_name and surname
+					# fields be set, we'll just set the both to 'Anonymous' if
+					# the user has # explicitly said they don't want to collect
+					# those fields.
+					data['given_name'] = data['given_name'] or 'Anonymous'
+					data['surname'] = data['surname'] or 'Anonymous'
+
+					# Create the user account on Stormpath.  If this fails, an
+					# exception will be raised.
+					account = User.create(**data)
+
+					# If we're able to successfully create the user's account,
+					# we'll log the user in (creating a secure session using
+					# Flask-Login), then redirect the user to the
+					# STORMPATH_REDIRECT_URL setting.
+					login_user(account, remember=True)
+
+					return render_template(
+						app.config['STORMPATH_REGISTRATION_TEMPLATE'],
+						form = form,
+						success = True
+					)
+
+	            except StormpathError as err:
+	                flash(err.message.get('message'))
+
+		    return render_template(
+		        app.config['STORMPATH_REGISTRATION_TEMPLATE'],
+		        form = form,
+		    )
 
 if __name__ == "__main__":
 	app.run(debug=False)
