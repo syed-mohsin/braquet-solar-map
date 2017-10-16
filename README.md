@@ -2,8 +2,10 @@
 Goal: To empower solar developers with software starting with a system design tool
 
 # See Live Version
-https://braquet.pythonanywhere.com
+https://braquet-solar-map.herokuapp.com
 
+# See Video Demo
+https://www.youtube.com/watch?v=eCuscWS1u-I
 
 # Environment Setup 
 
@@ -16,6 +18,10 @@ pip install -r requirements.txt
 ```
 $ python solar_map.py
 ```
+
+## User Login system is deprecated
+StormPath, our 3rd party Identity and User Management API is depecrated and so Sign In and Sign Up are non-functional. 
+
 
 
 
