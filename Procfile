@@ -1,1 +1,1 @@
-web: gunicorn app --log-file=-
+web: gunicorn solar_map:app --log-file=-
